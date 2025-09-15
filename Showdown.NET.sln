@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Showdown.NET", "Showdown.NET\Showdown.NET.csproj", "{B4665DF1-5185-428A-97CA-BF009B647B51}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Showdown.NET.Demo", "Showdown.NET.Demo\Showdown.NET.Demo.csproj", "{8ABB17B7-9AAE-4E5E-A46B-0B37ED418E1A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B4665DF1-5185-428A-97CA-BF009B647B51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4665DF1-5185-428A-97CA-BF009B647B51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4665DF1-5185-428A-97CA-BF009B647B51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4665DF1-5185-428A-97CA-BF009B647B51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8ABB17B7-9AAE-4E5E-A46B-0B37ED418E1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8ABB17B7-9AAE-4E5E-A46B-0B37ED418E1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8ABB17B7-9AAE-4E5E-A46B-0B37ED418E1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8ABB17B7-9AAE-4E5E-A46B-0B37ED418E1A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

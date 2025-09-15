@@ -1,9 +1,9 @@
 ﻿using Showdown.NET.Sim;
 
-namespace Showdown.NET.Demo;
+namespace Showdown.NET.Demo.Basic;
 
 /// <summary>
-/// Basic demo of sending commands to and reading outputs from Showdown.NET.
+/// Basic demo of sending commands to and reading outputs from Pokémon Showdown using Showdown.NET.
 /// </summary>
 internal class Program
 {

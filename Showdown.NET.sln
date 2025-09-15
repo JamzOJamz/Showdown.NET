@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Showdown.NET", "Showdown.NET\Showdown.NET.csproj", "{B4665DF1-5185-428A-97CA-BF009B647B51}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Showdown.NET.Demo", "Showdown.NET.Demo\Showdown.NET.Demo.csproj", "{8ABB17B7-9AAE-4E5E-A46B-0B37ED418E1A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Showdown.NET.Demo.Basic", "Showdown.NET.Demo.Basic\Showdown.NET.Demo.Basic.csproj", "{8ABB17B7-9AAE-4E5E-A46B-0B37ED418E1A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

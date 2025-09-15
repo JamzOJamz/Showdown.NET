@@ -7,8 +7,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="JetBrains.Annotations" Version="2025.2.2" />
-      <PackageReference Include="Microsoft.ClearScript.Complete" Version="7.5.0" />
+        <PackageReference Include="JetBrains.Annotations" Version="2025.2.2"/>
+        <PackageReference Include="Microsoft.ClearScript.Complete" Version="7.5.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\pokemon-showdown\dist\**\*"
+              CopyToOutputDirectory="PreserveNewest"
+              CopyToPublishDirectory="PreserveNewest"
+              Link="pokemon-showdown\dist\%(RecursiveDir)%(Filename)%(Extension)"
+              Visible="false"
+              ExcludeFromProject="true"/>
     </ItemGroup>
 
 </Project>

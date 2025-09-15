@@ -1,6 +1,3 @@
-using Microsoft.ClearScript;
-using Microsoft.ClearScript.V8;
-
 namespace Showdown.NET;
 
 public static class Showdown
@@ -9,12 +6,14 @@ public static class Showdown
     private static readonly object InitLock = new();
     internal static ShowdownEngine? Engine;
 
-    public static void Init(string showdownDistPath)
+    public static void Init(string showdownDistPath = @".\pokemon-showdown\dist")
     {
-        if (!Directory.Exists(showdownDistPath))
+        var absolutePath = Path.GetFullPath(showdownDistPath);
+        
+        if (!Directory.Exists(absolutePath))
         {
             throw new DirectoryNotFoundException(
-                $"The specified Showdown distribution path does not exist: '{showdownDistPath}'"
+                $"The specified Showdown distribution path does not exist: '{absolutePath}'"
             );
         }
         
@@ -23,7 +22,7 @@ public static class Showdown
             if (_initialized)
                 return;
 
-            Engine = new ShowdownEngine(showdownDistPath);
+            Engine = new ShowdownEngine(absolutePath);
             _initialized = true;
         }
     }
@@ -39,16 +38,5 @@ public static class Showdown
                 );
             }
         }
-    }
-    
-    private static V8ScriptEngine CreateV8Engine()
-    {
-        var engine = new V8ScriptEngine(V8ScriptEngineFlags.EnableDynamicModuleImports);
-
-        engine.AllowReflection = true;
-        engine.DocumentSettings.AccessFlags = DocumentAccessFlags.EnableFileLoading;
-        engine.DocumentSettings.Loader = new ShowdownDocumentLoader();
-        
-        return engine;
     }
 }

@@ -3,7 +3,7 @@
 namespace Showdown.NET.Demo;
 
 /// <summary>
-/// Demonstrates basic usage of the Showdown.NET library for simulating Pokémon battles.
+/// Basic demo of sending commands to and reading outputs from Showdown.NET.
 /// </summary>
 internal class Program
 {

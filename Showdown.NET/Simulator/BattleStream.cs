@@ -17,9 +17,9 @@ public class BattleStream
         """);
     }
 
-    public void Write(string chunk)
+    public void Write(string command)
     {
-        _wrappedBattleStream.write(chunk);
+        _wrappedBattleStream.write(command);
     }
     
     public async Task<string> ReadAsync()

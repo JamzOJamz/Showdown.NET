@@ -1,4 +1,5 @@
-﻿using Showdown.NET.Simulator;
+﻿using Showdown.NET.Protocol;
+using Showdown.NET.Simulator;
 
 namespace Showdown.NET.Demo;
 
@@ -44,12 +45,24 @@ internal class Program
         // BattleStream handles communication with the simulator
         var stream = new BattleStream();
 
-        stream.Write(""">start {"formatid":"gen7randombattle"}""");
-        stream.Write(""">player p1 {"name":"Alice"}""");
-        stream.Write(""">player p2 {"name":"Bob"}""");
+        // Using ProtocolCodec (recommended approach)
+        stream.Write(ProtocolCodec.EncodeStartCommand("gen7randombattle")); // >start {"formatid":"gen7randombattle"}
+        stream.Write(ProtocolCodec.EncodePlayerCommand("p1", "Alice")); // >player p1 {"name":"Alice"}
+        stream.Write(ProtocolCodec.EncodePlayerCommand("p2", "Bob")); // >player p2 {"name":"Bob"}
+
+        // Alternative: Direct protocol commands (without ProtocolCodec)
+        // stream.Write(">start {\"formatid\":\"gen7randombattle\"}");
+        // stream.Write(">player p1 {\"name\":\"Alice\"}");
+        // stream.Write(">player p2 {\"name\":\"Bob\"}");
 
         // Print all simulator outputs (battle updates, logs, etc.)
-        await foreach (var output in stream.ReadOutputsAsync()) Console.WriteLine(output);
+        await foreach (var output in stream.ReadOutputsAsync())
+        {
+            Console.WriteLine(output);
+            
+            // var parsed = ProtocolCodec.Parse(output);
+            // Work with parsed message here
+        }
     }
 
     private static Task RunReplDemo()

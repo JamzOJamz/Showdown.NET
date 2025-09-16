@@ -38,7 +38,7 @@ This library was originally created to add turn-based battling capabilities to [
 
 ## How It Works
 
-Showdown.NET uses [ClearScript](https://github.com/microsoft/ClearScript) to run the JavaScript build of Pokémon Showdown inside a native V8 script engine. A [Pokémon Showdown fork](https://github.com/smogon/pokemon-showdown), only lightly modified to be compatible with Showdown.NET, is included as a submodule. This submodule is copied to the library's output directory during builds and loaded at runtime.
+Showdown.NET uses [ClearScript](https://github.com/microsoft/ClearScript) to run the JavaScript build of Pokémon Showdown inside a native V8 script engine. A [Pokémon Showdown fork](https://github.com/JamzOJamz/pokemon-showdown), only lightly modified to be compatible with Showdown.NET, is included as a submodule. This submodule is copied to the library's output directory during builds and loaded at runtime.
 
 This approach allows C# code to interact with Showdown’s battle logic directly, without rewriting the simulator from scratch.
 

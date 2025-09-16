@@ -1,6 +1,6 @@
 using Microsoft.ClearScript;
 
-namespace Showdown.NET;
+namespace Showdown.NET.Core;
 
 internal class ShowdownDocumentLoader : DocumentLoader
 {

@@ -1,3 +1,5 @@
+using Showdown.NET.Core;
+
 namespace Showdown.NET;
 
 public static class Showdown

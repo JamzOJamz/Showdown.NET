@@ -3,7 +3,7 @@ using Microsoft.ClearScript;
 using Microsoft.ClearScript.JavaScript;
 using Microsoft.ClearScript.V8;
 
-namespace Showdown.NET;
+namespace Showdown.NET.Core;
 
 internal class ShowdownEngine
 {

@@ -7,6 +7,29 @@
 
 **Showdown.NET** is a **.NET library** that provides a C# interface for the [Pokémon Showdown](https://pokemonshowdown.com) battle simulator ([repo](https://github.com/smogon/pokemon-showdown)).
 
+## Quick Start
+
+```csharp
+using Showdown.NET.Simulator;
+
+// Initialize the battle simulator
+Showdown.Init();
+
+// Create a battle stream
+var stream = new BattleStream();
+
+// Start a random battle
+stream.Write(""">start {"formatid":"gen7randombattle"}""");
+stream.Write(""">player p1 {"name":"Alice"}""");
+stream.Write(""">player p2 {"name":"Bob"}""");
+
+// Read battle outputs
+await foreach (var output in stream.ReadOutputsAsync())
+{
+    Console.WriteLine(output);
+}
+```
+
 ## Purpose
 
 The primary goal of Showdown.NET is to **expose Pokémon Showdown's battle simulator through a C# API, handling JavaScript interop behind the scenes.**

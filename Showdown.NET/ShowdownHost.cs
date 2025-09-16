@@ -2,7 +2,7 @@ using Showdown.NET.Core;
 
 namespace Showdown.NET;
 
-public static class Showdown
+public static class ShowdownHost
 {
     private static bool _initialized;
     private static readonly object InitLock = new();

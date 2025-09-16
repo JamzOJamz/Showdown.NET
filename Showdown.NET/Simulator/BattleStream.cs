@@ -10,8 +10,8 @@ public class BattleStream
 
     public BattleStream()
     {
-        Showdown.EnsureInitialized();
-        _wrappedBattleStream = Showdown.Engine!.EvaluateModule("""
+        ShowdownHost.EnsureInitialized();
+        _wrappedBattleStream = ShowdownHost.Engine!.EvaluateModule("""
             const BattleStream = require('./sim/battle-stream.js').BattleStream;
             return new BattleStream();
         """);
@@ -24,11 +24,11 @@ public class BattleStream
     
     public async Task<string> ReadAsync()
     {
-        var engine = Showdown.Engine!;
+        var engine = ShowdownHost.Engine!;
         try
         {
-            Showdown.Engine!.Script.x = _wrappedBattleStream;
-            var result = await (Task<object>)Showdown.Engine.EvaluateScript("""
+            ShowdownHost.Engine!.Script.x = _wrappedBattleStream;
+            var result = await (Task<object>)ShowdownHost.Engine.EvaluateScript("""
                 (async () => {
                     var c = await x.next();
                     return c.value ?? null;

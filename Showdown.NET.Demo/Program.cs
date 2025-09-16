@@ -16,7 +16,7 @@ internal class Program
         // Initialize the Showdown.NET runtime
         // By default, it looks for Pokémon Showdown in ".\pokemon-showdown\dist"
         // but you can also provide a custom path if the default location doesn't match your setup
-        Showdown.Init();
+        ShowdownHost.Init();
 
         Console.WriteLine("Select demo mode:");
         Console.WriteLine("1) Basic demo (hardcoded commands)");

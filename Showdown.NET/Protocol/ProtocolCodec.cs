@@ -31,8 +31,6 @@ public static class ProtocolCodec
         switch (messageType)
         {
             case "update":
-                Console.WriteLine("Parsing update!");
-
                 var parts = new List<MessagePart>();
 
                 for (var i = 1; i < lines.Length; i++)
@@ -66,12 +64,39 @@ public static class ProtocolCodec
                 return new UpdateMessage(parts);
             case "sideupdate":
                 if (lines.Length <= 1) break;
-
+                
                 var player = lines[1].Trim();
-                Console.WriteLine($"Parsing sideupdate for player {player}");
+                var sideUpdateParts = new List<MessagePart>();
 
-                return new SideUpdateMessage(player, []);
+                for (var i = 2; i < lines.Length; i++)
+                {
+                    var line = lines[i].Trim();
 
+                    if (!line.StartsWith('|'))
+                        continue;
+
+                    var segments = line.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+                    if (segments.Length < 2)
+                        continue;
+
+                    var command = segments[0];
+
+                    switch (command)
+                    {
+                        case "t:":
+                            sideUpdateParts.Add(new TimestampPart(segments[1]));
+                            break;
+                        case "gametype":
+                            sideUpdateParts.Add(new GameTypePart(segments[1]));
+                            break;
+                        default:
+                            sideUpdateParts.Add(new UnknownPart(line));
+                            break;
+                    }
+                }
+
+                return new SideUpdateMessage(player, sideUpdateParts);
             default:
                 Console.WriteLine($"Unknown message type: {messageType}");
                 break;
@@ -79,19 +104,4 @@ public static class ProtocolCodec
 
         return null;
     }
-
-    public abstract record MessagePart;
-
-    public record TimestampPart(string Timestamp) : MessagePart;
-
-    public record GameTypePart(string GameType) : MessagePart;
-
-    public record UnknownPart(string Content) : MessagePart;
-
-
-    public abstract record ParsedMessage(List<MessagePart> Parts);
-
-    public record UpdateMessage(List<MessagePart> Parts) : ParsedMessage(Parts);
-
-    public record SideUpdateMessage(string Player, List<MessagePart> Parts) : ParsedMessage(Parts);
 }

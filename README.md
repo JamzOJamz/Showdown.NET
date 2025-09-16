@@ -13,7 +13,7 @@
 using Showdown.NET.Simulator;
 
 // Initialize the battle simulator
-Showdown.Init();
+ShowdownHost.Init();
 
 // Create a battle stream
 var stream = new BattleStream();

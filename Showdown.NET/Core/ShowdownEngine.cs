@@ -32,7 +32,7 @@ internal class ShowdownEngine
         return Engine.Evaluate(code);
     }
 
-    private static V8ScriptEngine CreateV8Engine(string showdownDistPath)
+    private static V8ScriptEngine CreateV8Engine(string showdownDistPath, string? v8RuntimeSearchPath = null)
     {
         var engine = new V8ScriptEngine(V8ScriptEngineFlags.EnableDynamicModuleImports |
                                         V8ScriptEngineFlags.EnableTaskPromiseConversion);

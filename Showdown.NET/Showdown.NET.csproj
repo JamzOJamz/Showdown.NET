@@ -14,11 +14,12 @@
 
     <ItemGroup>
         <None Include="..\pokemon-showdown\dist\**\*"
+              Exclude="..\pokemon-showdown\dist\server\**\*;..\pokemon-showdown\dist\tools\**\*;..\pokemon-showdown\dist\translations\**\*"
               CopyToOutputDirectory="PreserveNewest"
               CopyToPublishDirectory="PreserveNewest"
               Link="pokemon-showdown\dist\%(RecursiveDir)%(Filename)%(Extension)"
               Visible="false"
               ExcludeFromProject="true"/>
     </ItemGroup>
-    
+
 </Project>

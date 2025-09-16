@@ -39,16 +39,11 @@ internal class Program
 
         var stream = new BattleStream();
 
-        var readerTask = Task.Run(async () =>
-        {
-            await foreach (var output in stream.ReadOutputsAsync()) Console.WriteLine(output);
-        });
-
         stream.Write(""">start {"formatid":"gen7randombattle"}""");
         stream.Write(""">player p1 {"name":"Alice"}""");
         stream.Write(""">player p2 {"name":"Bob"}""");
-
-        await readerTask;
+        
+        await foreach (var output in stream.ReadOutputsAsync()) Console.WriteLine(output);
     }
 
     private static Task RunReplDemo()

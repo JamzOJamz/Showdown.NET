@@ -1,7 +1,7 @@
 using JetBrains.Annotations;
 using Microsoft.ClearScript;
 
-namespace Showdown.NET.Sim;
+namespace Showdown.NET.Simulator;
 
 [PublicAPI]
 public class BattleStream

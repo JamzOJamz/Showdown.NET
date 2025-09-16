@@ -1,4 +1,4 @@
-﻿using Showdown.NET.Sim;
+﻿using Showdown.NET.Simulator;
 
 namespace Showdown.NET.Demo.Basic;
 

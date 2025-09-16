@@ -62,9 +62,6 @@ internal class Program
             
             // var parsed = ProtocolCodec.Parse(output);
             // Work with parsed message here
-
-            var parsed = ProtocolCodec.Parse(output);
-            Console.WriteLine(parsed!.Parts.Count);
         }
     }
 

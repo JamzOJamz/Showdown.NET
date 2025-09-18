@@ -6,8 +6,10 @@ using SharpCompress.Archives.Zip;
 
 namespace Showdown.NET.Core;
 
-internal class ShowdownEngine
+internal sealed class ShowdownEngine : IDisposable
 {
+    private bool _disposed;
+
     public ShowdownEngine(string showdownDistPath)
     {
         Initialize(CreateV8Engine(new ShowdownDiskDocumentLoader(), showdownDistPath));
@@ -30,16 +32,19 @@ internal class ShowdownEngine
 
     public void Execute(string code)
     {
+        ThrowIfDisposed();
         Engine.Execute(new DocumentInfo { Category = ModuleCategory.CommonJS }, code);
     }
 
     public object EvaluateModule(string code)
     {
+        ThrowIfDisposed();
         return Engine.Evaluate(new DocumentInfo { Category = ModuleCategory.CommonJS }, code);
     }
 
     public object EvaluateScript(string code)
     {
+        ThrowIfDisposed();
         return Engine.Evaluate(code);
     }
 
@@ -168,5 +173,23 @@ internal class ShowdownEngine
         var buffer = new byte[length * 4];
         rng.GetBytes(buffer);
         for (var i = 0; i < length; i++) array[i] = BitConverter.ToInt32(buffer, i * 4);
+    }
+
+    private void ThrowIfDisposed()
+    {
+        if (!_disposed) return;
+        throw new ObjectDisposedException(nameof(ShowdownEngine));
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (_disposed || !disposing) return;
+        Engine?.Dispose();
+        _disposed = true;
     }
 }

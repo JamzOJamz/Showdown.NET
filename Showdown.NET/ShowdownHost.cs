@@ -40,6 +40,18 @@ public static class ShowdownHost
             _initialized = true;
         }
     }
+    
+    public static void Unload()
+    {
+        lock (InitLock)
+        {
+            if (!_initialized) return;
+            
+            Engine?.Dispose();
+            Engine = null;
+            _initialized = false;
+        }
+    }
 
     private static void SetV8Path(string? v8RuntimeSearchPath)
     {

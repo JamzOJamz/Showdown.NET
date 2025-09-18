@@ -28,8 +28,8 @@ public static class ShowdownHost
                     if (!File.Exists(libraryPath)) continue;
                     try
                     {
-                        var libPtr = NativeLibrary.Load(libraryPath);
-                        return libPtr;
+                        var libraryHandle = NativeLibrary.Load(libraryPath);
+                        return libraryHandle;
                     }
                     catch
                     {

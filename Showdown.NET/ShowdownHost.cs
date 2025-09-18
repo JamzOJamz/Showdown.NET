@@ -1,5 +1,7 @@
+using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using Microsoft.ClearScript;
+using Microsoft.ClearScript.V8;
 using SharpCompress.Archives.Zip;
 using Showdown.NET.Core;
 
@@ -11,6 +13,33 @@ public static class ShowdownHost
     private static bool _initialized;
     private static readonly object InitLock = new();
     internal static ShowdownEngine? Engine;
+
+    static ShowdownHost()
+    {
+        NativeLibrary.SetDllImportResolver(
+            typeof(V8Runtime).Assembly, (name, _, _) =>
+            {
+                if (NativeLibrary.TryLoad(name, out var existingHandle)) return existingHandle;
+
+                var searchDirs = HostSettings.AuxiliarySearchPath.Split(';');
+                foreach (var searchDir in searchDirs)
+                {
+                    var libraryPath = Path.Combine(searchDir, name);
+                    if (!File.Exists(libraryPath)) continue;
+                    try
+                    {
+                        var libPtr = NativeLibrary.Load(libraryPath);
+                        return libPtr;
+                    }
+                    catch
+                    {
+                        // Ignore load failures and continue searching other directories
+                    }
+                }
+
+                return IntPtr.Zero;
+            });
+    }
 
     public static void Init(string showdownDistPath = @".\pokemon-showdown\dist", string? v8RuntimeSearchPath = null)
     {

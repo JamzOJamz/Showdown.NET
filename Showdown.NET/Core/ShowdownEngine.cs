@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using Microsoft.ClearScript;
 using Microsoft.ClearScript.JavaScript;
 using Microsoft.ClearScript.V8;
+using SharpCompress.Archives.Zip;
 
 namespace Showdown.NET.Core;
 
@@ -9,13 +10,23 @@ internal class ShowdownEngine
 {
     public ShowdownEngine(string showdownDistPath)
     {
-        Engine = CreateV8Engine(showdownDistPath);
-        ExposeHostObjects();
+        Initialize(CreateV8Engine(new ShowdownDiskDocumentLoader(), showdownDistPath));
     }
 
-    private V8ScriptEngine Engine { get; }
+    public ShowdownEngine(ZipArchive showdownArchive)
+    {
+        Initialize(CreateV8Engine(new ShowdownMemoryDocumentLoader(showdownArchive)));
+    }
+
+    private V8ScriptEngine Engine { get; set; } = null!;
 
     public dynamic Script => Engine.Script;
+
+    private void Initialize(V8ScriptEngine engine)
+    {
+        Engine = engine;
+        ExposeHostObjects();
+    }
 
     public void Execute(string code)
     {
@@ -32,26 +43,45 @@ internal class ShowdownEngine
         return Engine.Evaluate(code);
     }
 
-    private static V8ScriptEngine CreateV8Engine(string showdownDistPath, string? v8RuntimeSearchPath = null)
+    private static V8ScriptEngine CreateV8Engine(DocumentLoader loader, string? searchPath = null)
     {
         var engine = new V8ScriptEngine(V8ScriptEngineFlags.EnableDynamicModuleImports |
                                         V8ScriptEngineFlags.EnableTaskPromiseConversion);
 
         engine.DocumentSettings.AccessFlags = DocumentAccessFlags.EnableFileLoading;
-        engine.DocumentSettings.SearchPath = showdownDistPath;
-        engine.DocumentSettings.Loader = new ShowdownDocumentLoader();
+        engine.DocumentSettings.Loader = loader;
+
+        if (!string.IsNullOrEmpty(searchPath)) engine.DocumentSettings.SearchPath = searchPath;
+
+        return engine;
+    }
+
+    private static V8ScriptEngine CreateV8Engine(ZipArchive showdownArchive)
+    {
+        var engine = new V8ScriptEngine(V8ScriptEngineFlags.EnableDynamicModuleImports |
+                                        V8ScriptEngineFlags.EnableTaskPromiseConversion);
+
+        engine.DocumentSettings.AccessFlags = DocumentAccessFlags.EnableFileLoading;
+        engine.DocumentSettings.Loader = new ShowdownMemoryDocumentLoader(showdownArchive);
 
         return engine;
     }
 
     private void ExposeHostObjects()
     {
-        Engine.AddHostType("Console", typeof(Console)); // Debugging
+        // Engine.AddHostType("Console", typeof(Console)); // For debugging
 
         Engine.AddHostObject("hostFs", new
         {
             readdirSync = new Func<string, object[]>(path =>
-                Directory.GetFileSystemEntries(path).Select(Path.GetFileName)!.ToArray<object>())
+            {
+                if (!path.StartsWith("vfs://"))
+                    return Directory.GetFileSystemEntries(path).Select(Path.GetFileName)!.ToArray<object>();
+
+                // Special handling when using virtual file system
+                var documentLoader = (ShowdownMemoryDocumentLoader)Engine.DocumentSettings.Loader;
+                return documentLoader.GetVirtualFileSystemEntries(path).ToArray<object>();
+            })
         });
 
         Engine.AddHostObject("hostThrow", new Action<string>(code => throw new Exception(code)));

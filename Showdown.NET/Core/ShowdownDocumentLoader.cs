@@ -31,8 +31,13 @@ function isPosixAbsolute(path) {
     return path.startsWith('/');
 }
 
+function isUrlScheme(path) {
+    // e.g. vfs://, http://, file://
+    return /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(path);
+}
+
 function isAbsolute(path) {
-    return isPosixAbsolute(path) || isWindowsAbsolute(path);
+    return isPosixAbsolute(path) || isWindowsAbsolute(path) || isUrlScheme(path);
 }
 
 function join(...args) {
@@ -45,7 +50,7 @@ function join(...args) {
     // Normalize using resolve
     const normalized = resolve(concatenated);
     
-    // If the first segment wasn’t absolute, strip any leading slash
+    // If the first segment wasn't absolute, strip any leading slash
     if (filtered.length && !isAbsolute(filtered[0])) {
         return normalized.replace(/^\/+/, '');
     }
@@ -57,6 +62,7 @@ function resolve(...args) {
     let resolvedPath = '';
     let absoluteFound = false;
     let sawWindowsDrive = false;
+    let urlScheme = '';
 
     // Iterate backwards through args
     for (let i = args.length - 1; i >= 0 && !absoluteFound; i--) {
@@ -69,6 +75,12 @@ function resolve(...args) {
             absoluteFound = true;
             if (isWindowsAbsolute(segment)) {
                 sawWindowsDrive = true;
+            } else if (isUrlScheme(segment)) {
+                // Extract just the scheme name (e.g., ""vfs"" from ""vfs://archive/hello"")
+                const match = segment.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):\/\//);
+                if (match) {
+                    urlScheme = match[1]; // Just the scheme name, no ://
+                }
             }
         }
     }
@@ -78,7 +90,18 @@ function resolve(...args) {
         resolvedPath = '/' + resolvedPath;
     }
 
-    const parts = resolvedPath.split(/[\\/]+/);
+    // Split the path, but preserve URL schemes
+    let parts;
+    if (urlScheme) {
+        // Remove the full scheme (e.g., ""vfs://"") temporarily, split, then add it back
+        const fullScheme = urlScheme + '://';
+        const pathWithoutScheme = resolvedPath.replace(fullScheme, '');
+        parts = pathWithoutScheme.split(/[\\/]+/).filter(p => p !== ''); // Filter empty parts
+        parts.unshift(urlScheme); // Add just the scheme name at beginning
+    } else {
+        parts = resolvedPath.split(/[\\/]+/);
+    }
+
     const finalParts = [];
 
     for (const part of parts) {
@@ -96,7 +119,12 @@ function resolve(...args) {
 
     let result;
 
-    if (sawWindowsDrive) {
+    if (urlScheme) {
+        // Reconstruct URL with proper double slash
+        const schemePart = finalParts[0]; // This is the scheme without ://
+        const pathParts = finalParts.slice(1);
+        result = schemePart + '://' + pathParts.join('/');
+    } else if (sawWindowsDrive) {
         // Keep Windows drive letter as-is
         result = finalParts.join('/');
     } else if (absoluteFound) {
@@ -447,42 +475,29 @@ module.exports = {
         }
     };
     
-    private readonly Dictionary<Uri, Document> _documentCache = new();
+    private readonly Dictionary<Uri, Document> _cache = new();
 
-    public override async Task<Document> LoadDocumentAsync(
-        DocumentSettings settings,
-        DocumentInfo? sourceInfo,
-        string specifier,
-        DocumentCategory category,
+    public override Task<Document>? LoadDocumentAsync(DocumentSettings settings, DocumentInfo? sourceInfo,
+        string specifier, DocumentCategory category,
         DocumentContextCallback contextCallback)
     {
-        // Check for polyfill first
-        if (TryLoadPolyfill(specifier, category, contextCallback, out var polyfillDocument))
-            return polyfillDocument;
+        return TryLoadPolyfill(specifier, category, contextCallback, out var polyfillDocument)
+            ? Task.FromResult(polyfillDocument)
+            : null;
+    }
 
-        var baseUri = sourceInfo?.Uri;
-
-        // Delegate to default loader if no base URI
-        if (baseUri is null)
-            return await Default.LoadDocumentAsync(settings, sourceInfo, specifier, category, contextCallback);
-
-        // Resolve the file path
-        var resolvedPath = ResolveFilePath(baseUri, specifier);
-        var resolvedUri = new Uri(resolvedPath, UriKind.Absolute);
-
-        // Return cached document if available
-        if (_documentCache.TryGetValue(resolvedUri, out var cachedDocument))
-            return cachedDocument;
-
-        // Override category to Json if the URI ends with .json
-        if (resolvedUri.LocalPath.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
-            category = DocumentCategory.Json;
-
-        // Load and cache the document
-        var document = await CreateDocumentFromFile(resolvedUri, category, contextCallback);
-        _documentCache[resolvedUri] = document;
-
+    public override Document CacheDocument(Document document, bool replace)
+    {
+        var uri = document.Info.Uri;
+        if (replace)
+            _cache.Remove(document.Info.Uri);
+        _cache[uri] = document;
         return document;
+    }
+
+    public override Document? GetCachedDocument(Uri uri)
+    {
+        return _cache.GetValueOrDefault(uri);
     }
 
     private static bool TryLoadPolyfill(
@@ -506,56 +521,7 @@ module.exports = {
         return false;
     }
 
-    private static string ResolveFilePath(Uri baseUri, string specifier)
-    {
-        var baseDir = Path.GetDirectoryName(baseUri.LocalPath)!;
-        var resolvedPath = Path.GetFullPath(Path.Combine(baseDir, specifier));
-
-        // Try exact path first
-        if (File.Exists(resolvedPath))
-            return resolvedPath;
-
-        // Try with .js extension
-        var jsFile = resolvedPath + ".js";
-        if (File.Exists(jsFile))
-            return jsFile;
-
-        // Try index.js in directory
-        var indexFile = Path.Combine(resolvedPath, "index.js");
-        return File.Exists(indexFile)
-            ? indexFile
-            :
-            // File not found - return original path for error handling
-            resolvedPath;
-    }
-
-    private static async Task<Document> CreateDocumentFromFile(
-        Uri resolvedUri,
-        DocumentCategory category,
-        DocumentContextCallback contextCallback)
-    {
-        var localPath = resolvedUri.LocalPath;
-
-        if (!File.Exists(localPath)) return CreateModuleNotFoundDocument(resolvedUri, category, contextCallback);
-
-        var localDir = Path.GetDirectoryName(localPath)
-                       ?? throw new InvalidOperationException("Resolved path has no directory.");
-
-        var code = await File.ReadAllTextAsync(localPath);
-        var finalCode = category == DocumentCategory.Json
-            ? code
-            : WrapCodeWithNodejsGlobals(code, localPath, localDir);
-
-        return new StringDocument(
-            new DocumentInfo(resolvedUri)
-            {
-                Category = category,
-                ContextCallback = contextCallback
-            },
-            finalCode);
-    }
-
-    private static StringDocument CreateModuleNotFoundDocument(
+    protected static StringDocument CreateModuleNotFoundDocument(
         Uri resolvedUri,
         DocumentCategory category,
         DocumentContextCallback contextCallback)
@@ -569,7 +535,7 @@ module.exports = {
         return new StringDocument(documentInfo, "hostThrow('MODULE_NOT_FOUND');");
     }
 
-    private static string WrapCodeWithNodejsGlobals(string code, string localPath, string localDir)
+    protected static string WrapCodeWithNodejsGlobals(string code, string localPath, string localDir)
     {
         var escapedPath = EscapeForJsString(localPath);
         var escapedDir = EscapeForJsString(localDir);
@@ -584,5 +550,10 @@ module.exports = {
     private static string EscapeForJsString(string path)
     {
         return path.Replace("\\", @"\\").Replace("\"", "\\\"");
+    }
+
+    public override void DiscardCachedDocuments()
+    {
+        _cache.Clear();
     }
 }

@@ -7,7 +7,7 @@ namespace Showdown.NET.Simulator;
 public class BattleStream : IDisposable
 {
     private readonly dynamic _wrappedBattleStream;
-    private bool _disposed = false;
+    private bool _disposed;
 
     public BattleStream()
     {

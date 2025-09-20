@@ -1,5 +1,6 @@
 using System.Text.Json;
 using JetBrains.Annotations;
+using Showdown.NET.Simulator;
 
 namespace Showdown.NET.Protocol;
 
@@ -13,14 +14,29 @@ public static class ProtocolCodec
         return $">start {json}";
     }
 
-    public static string EncodePlayerCommand(string player, string name)
+    public static string EncodeSetPlayerCommand(string player, string name, PokemonSet[]? team = null)
     {
-        var payload = new { name };
+        var payload = new Dictionary<string, object?>
+        {
+            ["name"] = name
+        };
+
+        if (team != null) payload["team"] = team;
+
         var json = JsonSerializer.Serialize(payload);
         return $">player {player} {json}";
     }
 
-    public static ParsedMessage? Parse(string message)
+    public static string EncodePlayerChoiceCommand(string player, params string[] args)
+    {
+        if (args.Length == 0)
+            throw new ArgumentException("At least one argument is required", nameof(args));
+
+        var command = string.Join(" ", args);
+        return $">{player} {command}";
+    }
+
+    public static ProtocolFrame? Parse(string message)
     {
         if (string.IsNullOrWhiteSpace(message))
             return null;
@@ -28,80 +44,219 @@ public static class ProtocolCodec
         var lines = message.Split('\n', StringSplitOptions.RemoveEmptyEntries);
         var messageType = lines[0].Trim();
 
-        switch (messageType)
+        return messageType switch
         {
-            case "update":
-                var parts = new List<MessagePart>();
+            "update" => ParseUpdateFrame(lines),
+            "sideupdate" => ParseSideUpdateFrame(lines),
+            "end" => ParseEndFrame(lines),
+            _ => null
+        };
+    }
 
-                for (var i = 1; i < lines.Length; i++)
-                {
-                    var line = lines[i].Trim();
+    private static UpdateFrame ParseUpdateFrame(string[] lines)
+    {
+        var parts = new List<ProtocolElement>();
+        var i = 1;
 
-                    if (!line.StartsWith('|'))
-                        continue;
+        while (i < lines.Length)
+        {
+            var element = ParseProtocolElementWithSplit(lines, ref i);
+            if (element != null)
+                parts.Add(element);
+        }
 
-                    var segments = line.Split('|', StringSplitOptions.RemoveEmptyEntries);
+        return new UpdateFrame(parts);
+    }
 
-                    if (segments.Length < 2)
-                        continue;
+    private static SideUpdateFrame? ParseSideUpdateFrame(string[] lines)
+    {
+        if (lines.Length <= 1)
+            return null;
 
-                    var command = segments[0];
+        var player = lines[1].Trim();
+        var parts = new List<ProtocolElement>();
+        var i = 2;
 
-                    switch (command)
-                    {
-                        case "t:":
-                            parts.Add(new TimestampPart(segments[1]));
-                            break;
-                        case "gametype":
-                            parts.Add(new GameTypePart(segments[1]));
-                            break;
-                        default:
-                            parts.Add(new UnknownPart(line));
-                            break;
-                    }
-                }
+        while (i < lines.Length)
+        {
+            var element = ParseProtocolElementWithSplit(lines, ref i);
+            if (element != null)
+                parts.Add(element);
+        }
 
-                return new UpdateMessage(parts);
-            case "sideupdate":
-                if (lines.Length <= 1) break;
-                
-                var player = lines[1].Trim();
-                var sideUpdateParts = new List<MessagePart>();
+        return new SideUpdateFrame(player, parts);
+    }
 
-                for (var i = 2; i < lines.Length; i++)
-                {
-                    var line = lines[i].Trim();
+    private static EndFrame? ParseEndFrame(string[] lines)
+    {
+        return new EndFrame(lines[1]);
+    }
 
-                    if (!line.StartsWith('|'))
-                        continue;
+    private static ProtocolElement? ParseProtocolElementWithSplit(string[] lines, ref int index)
+    {
+        if (index >= lines.Length)
+            return null;
 
-                    var segments = line.Split('|', StringSplitOptions.RemoveEmptyEntries);
+        var currentLine = lines[index].Trim();
 
-                    if (segments.Length < 2)
-                        continue;
+        // Check if this is a split command
+        if (currentLine.StartsWith("|split|"))
+        {
+            var splitSegments = currentLine[1..].Split('|');
+            if (splitSegments.Length < 2)
+            {
+                index++;
+                return null;
+            }
 
-                    var command = segments[0];
+            var playerId = splitSegments[1];
 
-                    switch (command)
-                    {
-                        case "t:":
-                            sideUpdateParts.Add(new TimestampPart(segments[1]));
-                            break;
-                        case "gametype":
-                            sideUpdateParts.Add(new GameTypePart(segments[1]));
-                            break;
-                        default:
-                            sideUpdateParts.Add(new UnknownPart(line));
-                            break;
-                    }
-                }
+            // We need to peek ahead to get the secret and public elements
+            if (index + 2 >= lines.Length)
+            {
+                index++;
+                return null;
+            }
 
-                return new SideUpdateMessage(player, sideUpdateParts);
+            var secretElement = ParseProtocolElement(lines[index + 1]);
+            var publicElement = ParseProtocolElement(lines[index + 2]);
+
+            // Skip ahead by 3 lines (split + secret + public)
+            index += 3;
+
+            if (secretElement != null && publicElement != null)
+                return CreateSplitElement(playerId, secretElement, publicElement);
+
+            return null;
+        }
+
+        // Regular protocol element
+        var element = ParseProtocolElement(currentLine);
+        index++;
+        return element;
+    }
+
+    private static ProtocolElement CreateSplitElement(string playerId, ProtocolElement secret, ProtocolElement @public)
+    {
+        // Using reflection to create the generic SplitElement with the correct type
+        var secretType = secret.GetType();
+        var splitElementType = typeof(SplitElement<>).MakeGenericType(secretType);
+
+        return (ProtocolElement)Activator.CreateInstance(splitElementType, playerId, secret, @public)!;
+    }
+
+    private static ProtocolElement? ParseProtocolElement(string line)
+    {
+        var trimmedLine = line.Trim();
+
+        if (!trimmedLine.StartsWith('|'))
+            return null;
+
+        var segments = trimmedLine[1..].Split('|');
+
+        if (segments.Length < 1)
+            return null;
+
+        var command = segments[0];
+        ProtocolElement elem;
+        var usedCount = 0;
+
+        switch (command)
+        {
+            // Battle initialization
+            case "player" when segments.Length > 4:
+                elem = new PlayerDetailsElement(segments[1], segments[2], segments[3], segments[4]);
+                usedCount = 4;
+                break;
+            case "teamsize" when segments.Length > 2:
+                elem = TeamSizeElement.Parse(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "gametype" when segments.Length > 1:
+                elem = GameTypeElement.Parse(segments[1]);
+                usedCount = 1;
+                break;
+            case "gen" when segments.Length > 1:
+                elem = GenElement.Parse(segments[1]);
+                usedCount = 1;
+                break;
+            case "tier" when segments.Length > 1:
+                elem = new TierElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "clearpoke":
+                elem = new ClearPokeElement();
+                break;
+            case "poke" when segments.Length > 3:
+                elem = new PokeElement(segments[1], segments[2], segments[3]);
+                usedCount = 3;
+                break;
+            case "teampreview":
+                elem = new TeamPreviewElement();
+                break;
+            case "start":
+                elem = new StartElement();
+                break;
+
+            // Battle progress
+            case "":
+                elem = new SpacerElement();
+                break;
+            case "request" when segments.Length > 1:
+                elem = new RequestElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "upkeep":
+                elem = new UpkeepElement();
+                break;
+            case "turn" when segments.Length > 1:
+                elem = TurnElement.Parse(segments[1]);
+                usedCount = 1;
+                break;
+            case "win" when segments.Length > 1:
+                elem = new WinElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "t:" when segments.Length > 1:
+                elem = TimestampElement.Parse(segments[1]);
+                usedCount = 1;
+                break;
+
+            // Major actions
+            case "move" when segments.Length > 3:
+                elem = new MoveElement(segments[1], segments[2], segments[3]);
+                usedCount = 3;
+                break;
+            case "switch" when segments.Length > 3:
+                elem = SwitchElement.Parse(segments[1], segments[2], segments[3]);
+                usedCount = 3;
+                break;
+            case "faint" when segments.Length > 1:
+                elem = new FaintElement(segments[1]);
+                usedCount = 1;
+                break;
+
+            // Minor actions
+            case "-damage" when segments.Length > 2:
+                elem = DamageElement.Parse(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "-activate" when segments.Length > 2:
+                elem = new ActivateElement(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+
+            // Fallback for unprocessable elements
             default:
-                Console.WriteLine($"Unknown message type: {messageType}");
+                elem = new UnknownElement(trimmedLine);
+                usedCount = int.MaxValue - 1; // Hack to not read tags
                 break;
         }
 
-        return null;
+        // Store all remaining segments as tags
+        if (segments.Length > usedCount + 1)
+            elem.Tags = segments[(usedCount + 1)..];
+
+        return elem;
     }
 }

@@ -76,6 +76,8 @@ internal sealed class ShowdownEngine : IDisposable
     {
         // Engine.AddHostType("Console", typeof(Console)); // For debugging
 
+        Engine.AddHostObject("global", new { });
+
         Engine.AddHostObject("hostFs", new
         {
             readdirSync = new Func<string, object[]>(path =>

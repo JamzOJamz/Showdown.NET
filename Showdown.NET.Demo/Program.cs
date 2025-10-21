@@ -42,28 +42,28 @@ internal class Program
                 break;
         }
     }
-    
+
     private static async Task RunBasicDemo()
     {
         Console.Clear();
-        
+
         // BattleStream handles communication with the simulator
         var stream = new BattleStream();
 
         WriteAndLog(ProtocolCodec.EncodeStartCommand("gen7randombattle")); // >start {"formatid":"gen7randombattle"}
         WriteAndLog(ProtocolCodec.EncodeSetPlayerCommand("p1", "Alice")); // >player p1 {"name":"Alice"}
         WriteAndLog(ProtocolCodec.EncodeSetPlayerCommand("p2", "Bob")); // >player p2 {"name":"Bob"}
-        
+
         // Alternative: Direct protocol commands (without ProtocolCodec)
         // stream.Write(">start {\"formatid\":\"gen7randombattle\"}");
         // stream.Write(">player p1 {\"name\":\"Alice\"}");
         // stream.Write(">player p2 {\"name\":\"Bob\"}");
-        
+
         // Print all simulator outputs (battle updates, logs, etc.)
         await foreach (var output in stream.ReadOutputsAsync())
         {
             Console.WriteLine($"[<<<] {output}");
-            
+
             // var parsed = ProtocolCodec.Parse(output);
             // Work with parsed message here
         }
@@ -76,7 +76,7 @@ internal class Program
             stream.Write(command);
         }
     }
-    
+
     private static Task RunScriptedBattleDemo()
     {
         Console.Clear();
@@ -90,7 +90,7 @@ internal class Program
                 Moves = ["Tackle"]
             }
         };
-        
+
         var p2Team = new PokemonSet[]
         {
             new()
@@ -100,18 +100,18 @@ internal class Program
                 Moves = ["Scratch"]
             }
         };
-        
+
         var stream = new BattleStream();
-        
+
         // Task to print outputs asynchronously
-        Task.Run(async () =>
+        var outputTask = Task.Run(async () =>
         {
             await foreach (var output in stream.ReadOutputsAsync())
             {
                 Console.WriteLine($"[<<<] {output}");
             }
         });
-        
+
         WriteAndLog(ProtocolCodec.EncodeStartCommand("gen9customgame"));
         WriteAndLog(ProtocolCodec.EncodeSetPlayerCommand("p1", "Red", p1Team));
         WriteAndLog(ProtocolCodec.EncodeSetPlayerCommand("p2", "Green", p2Team));
@@ -119,8 +119,8 @@ internal class Program
         WriteAndLog(ProtocolCodec.EncodePlayerChoiceCommand("p2", "team", "123456"));
         WriteAndLog(ProtocolCodec.EncodePlayerChoiceCommand("p1", "move", "1"));
         WriteAndLog(ProtocolCodec.EncodePlayerChoiceCommand("p2", "move", "1"));
-        
-        return Task.CompletedTask;
+
+        return outputTask;
 
         void WriteAndLog(string command)
         {

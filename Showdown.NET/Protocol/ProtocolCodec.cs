@@ -14,14 +14,24 @@ public static class ProtocolCodec
         return $">start {json}";
     }
 
+    public static string EncodeSetPlayerCommand(string player, string name)
+        => EncodeSetPlayerCommandInternal(player, name, null);
+
     public static string EncodeSetPlayerCommand(string player, string name, PokemonSet[]? team = null)
+        => EncodeSetPlayerCommandInternal(player, name, team);
+
+    public static string EncodeSetPlayerCommand(string player, string name, string? team = null)
+        => EncodeSetPlayerCommandInternal(player, name, team);
+
+    private static string EncodeSetPlayerCommandInternal(string player, string name, object? team)
     {
         var payload = new Dictionary<string, object?>
         {
             ["name"] = name
         };
 
-        if (team != null) payload["team"] = team;
+        if (team != null)
+            payload["team"] = team;
 
         var json = JsonSerializer.Serialize(payload);
         return $">player {player} {json}";
@@ -237,13 +247,65 @@ public static class ProtocolCodec
                 break;
 
             // Minor actions
+            case "-fail" when segments.Length > 2:
+                elem = new FailElement(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "-block" when segments.Length > 2:
+                elem = BlockElement.Parse(segments, out usedCount);
+                break;
+            case "-miss" when segments.Length > 1:
+                elem = MissElement.Parse(segments, out usedCount);
+                break;
             case "-damage" when segments.Length > 2:
                 elem = DamageElement.Parse(segments[1], segments[2]);
                 usedCount = 2;
                 break;
+            case "-heal" when segments.Length > 2:
+                elem = HealElement.Parse(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "-start" when segments.Length > 2:
+                elem = new StartVolatileElement(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "-end" when segments.Length > 2:
+                elem = new EndVolatileElement(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "-crit" when segments.Length > 1:
+                elem = new CritElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "-supereffective" when segments.Length > 1:
+                elem = new SuperEffectiveElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "-resisted" when segments.Length > 1:
+                elem = new ResistedElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "-immune" when segments.Length > 1:
+                elem = new ImmuneElement(segments[1]);
+                usedCount = 1;
+                break;
             case "-activate" when segments.Length > 2:
                 elem = new ActivateElement(segments[1], segments[2]);
                 usedCount = 2;
+                break;
+            case "-hitcount" when segments.Length > 2:
+                elem = HitCountElement.Parse(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+
+            // Miscellaneous
+            case "debug" when segments.Length > 1:
+                elem = new DebugElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "error" when segments.Length > 1:
+                elem = new ErrorElement(segments[1]);
+                usedCount = 1;
                 break;
 
             // Fallback for unprocessable elements

@@ -7,7 +7,8 @@ namespace Showdown.NET.Simulator;
 public class BattleStream : IDisposable
 {
     private readonly dynamic _wrappedBattleStream;
-    private bool _disposed;
+    
+    public bool IsDisposed { get; private set; }
 
     public BattleStream()
     {
@@ -59,7 +60,7 @@ public class BattleStream : IDisposable
     
     private void ThrowIfDisposed()
     {
-        if (!_disposed) return;
+        if (!IsDisposed) return;
         throw new ObjectDisposedException(nameof(BattleStream));
     }
     
@@ -71,7 +72,7 @@ public class BattleStream : IDisposable
     
     protected virtual void Dispose(bool disposing)
     {
-        if (!_disposed && disposing)
+        if (!IsDisposed && disposing)
         {
             try
             {
@@ -84,7 +85,7 @@ public class BattleStream : IDisposable
             {
                 // Ignore errors during disposal
             }
-            _disposed = true;
+            IsDisposed = true;
         }
     }
 }

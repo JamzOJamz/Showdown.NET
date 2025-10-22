@@ -259,11 +259,11 @@ public sealed record DragElement(string Pokemon, string Details, string HP, stri
 /// <summary>
 ///     <para>
 ///         The specified Pokémon has changed formes (via Mega Evolution, ability, etc.) to <c>SPECIES</c>
-///         (provided in <see cref="Details"/> for <see cref="DetailsChangeElement"/>, provided directly for <see cref="FormeChangeElement"/>.)
-///         If the forme change is permanent (Mega Evolution or a Shaymin-Sky that is frozen), then <see cref="DetailsChangeElement"/> will appear;
-///         otherwise, the client will send <see cref="FormeChangeElement"/>.
+///         (provided in <see cref="Details" /> for <see cref="DetailsChangeElement" />, provided directly for <see cref="FormeChangeElement" />.)
+///         If the forme change is permanent (Mega Evolution or a Shaymin-Sky that is frozen), then <see cref="DetailsChangeElement" /> will appear;
+///         otherwise, the client will send <see cref="FormeChangeElement" />.
 ///     </para>
-///     Syntax is the same as <see cref="SwitchElement"/>.
+///     Syntax is the same as <see cref="SwitchElement" />.
 /// </summary>
 [PublicAPI]
 public sealed record DetailsChangeElement(string Pokemon, string Details, string HP, string? Status) : ProtocolElement;
@@ -276,15 +276,15 @@ public sealed record FormeChangeElement(string Pokemon, string Species, string H
 /// <summary>
 ///     <para>
 ///         Illusion has ended for the specified Pokémon.
-///         Syntax is the same as <see cref="SwitchElement"/>, but remember that everything you thought you knew about the previous Pokémon is now wrong.
+///         Syntax is the same as <see cref="SwitchElement" />, but remember that everything you thought you knew about the previous Pokémon is now wrong.
 ///     </para>
-///     <see cref="Pokemon"/> will be the NEW Pokémon ID - i.e. it will have the nickname of the Zoroark (or other Illusion user).
+///     <see cref="Pokemon" /> will be the NEW Pokémon ID - i.e. it will have the nickname of the Zoroark (or other Illusion user).
 /// </summary>
 [PublicAPI]
 public sealed record ReplaceElement(string Pokemon, string Details, string HP, string? Status) : ProtocolElement;
 
 /// <summary>
-///     Moves already active <see cref="Pokemon"/> to active field <see cref="Position"/> where the leftmost position is 0 and each position to the right counts up by 1.
+///     Moves already active <see cref="Pokemon" /> to active field <see cref="Position" /> where the leftmost position is 0 and each position to the right counts up by 1.
 /// </summary>
 [PublicAPI]
 public sealed record SwapElement(string Pokemon, int Position) : ProtocolElement
@@ -295,7 +295,7 @@ public sealed record SwapElement(string Pokemon, int Position) : ProtocolElement
 }
 
 /// <summary>
-///     The Pokémon <see cref="Pokemon"/> could not perform a move because of the indicated <see cref="Reason"/>
+///     The Pokémon <see cref="Pokemon" /> could not perform a move because of the indicated <see cref="Reason" />
 ///     (such as paralysis, Disable, etc). Sometimes, the move it was trying to use is given.
 /// </summary>
 [PublicAPI]
@@ -448,14 +448,14 @@ public sealed record BoostElement(string Pokemon, StatID Stat, int Amount) : Pro
 }
 
 /// <summary>
-///     Same as <see cref="UnboostElement"/>, but for negative stat changes instead.
+///     Same as <see cref="UnboostElement" />, but for negative stat changes instead.
 /// </summary>
 [PublicAPI]
 [MinorAction]
 public sealed record UnboostElement(string Pokemon, StatID Stat, int Amount) : ProtocolElement;
 
 /// <summary>
-///     Same as <see cref="BoostElement"/> and <see cref="UnboostElement"/>, but <see cref="Stat" /> is set to <see cref="Amount" /> instead of boosted by <see cref="Amount" />.
+///     Same as <see cref="BoostElement" /> and <see cref="UnboostElement" />, but <see cref="Stat" /> is set to <see cref="Amount" /> instead of boosted by <see cref="Amount" />.
 ///     (For example: Anger Point, Belly Drum)
 /// </summary>
 [PublicAPI]
@@ -532,8 +532,8 @@ public sealed record CopyBoostElement(string Source, string Target) : ProtocolEl
 
 /// <summary>
 ///     Indicates the weather that is currently in effect.
-///     If <see cref="Upkeep"/> is <see langword="true"/>, it means that <see cref="Weather"/> was active previously and is still in effect that turn.
-///     Otherwise, it means that the weather has changed due to a move or ability, or has expired, in which case <see cref="Weather"/> will be <see langword="null"/>.
+///     If <see cref="Upkeep" /> is <see langword="true" />, it means that <see cref="Weather" /> was active previously and is still in effect that turn.
+///     Otherwise, it means that the weather has changed due to a move or ability, or has expired, in which case <see cref="Weather" /> will be <see langword="null" />.
 /// </summary>
 [PublicAPI]
 [MinorAction]
@@ -555,7 +555,7 @@ public sealed record WeatherElement(string? Weather, bool Upkeep) : ProtocolElem
 }
 
 /// <summary>
-///     The field condition <see cref="Condition"/> has started.
+///     The field condition <see cref="Condition" /> has started.
 ///     Field conditions are all effects that affect the entire field and aren't a weather.
 ///     (For example: Trick Room, Grassy Terrain)
 /// </summary>
@@ -564,14 +564,14 @@ public sealed record WeatherElement(string? Weather, bool Upkeep) : ProtocolElem
 public sealed record FieldStartElement(string Condition) : ProtocolElement;
 
 /// <summary>
-///     Indicates that the field condition <see cref="Condition"/> has ended.
+///     Indicates that the field condition <see cref="Condition" /> has ended.
 /// </summary>
 [PublicAPI]
 [MinorAction]
 public sealed record FieldEndElement(string Condition) : ProtocolElement;
 
 /// <summary>
-///     A side condition <see cref="Condition"/> has started on <see cref="Side"/>.
+///     A side condition <see cref="Condition" /> has started on <see cref="Side" />.
 ///     Side conditions are all effects that affect one side of the field.
 ///     (For example: Tailwind, Stealth Rock, Reflect)
 /// </summary>
@@ -584,7 +584,7 @@ public sealed record SideStartElement(int Side, string Condition) : ProtocolElem
 }
 
 /// <summary>
-///     Indicates that the side condition <see cref="Condition"/> ended for the given <see cref="Side"/>.
+///     Indicates that the side condition <see cref="Condition" /> ended for the given <see cref="Side" />.
 /// </summary>
 [PublicAPI]
 [MinorAction]
@@ -646,7 +646,7 @@ public sealed record ResistedElement(string Pokemon) : ProtocolElement;
 public sealed record ImmuneElement(string Pokemon) : ProtocolElement;
 
 /// <summary>
-///     The <see cref="Item"/> held by the <see cref="Pokemon"/> has been changed or revealed.
+///     The <see cref="Item" /> held by the <see cref="Pokemon" /> has been changed or revealed.
 ///     If this includes a <c>[from]EFFECT</c> tag, it is due to a move or ability <c>EFFECT</c>.
 ///     Otherwise, it's because the Pokémon has just switched in, and its item is being announced to have a long-term effect.
 /// </summary>
@@ -656,7 +656,7 @@ public sealed record ItemElement(string Pokemon, string Item) : ProtocolElement;
 
 /// <summary>
 ///     <para>
-///         The <see cref="Item"/> held by <see cref="Pokemon"/> has been destroyed, and it now holds no item.
+///         The <see cref="Item" /> held by <see cref="Pokemon" /> has been destroyed, and it now holds no item.
 ///         If this includes a <c>[from]EFFECT</c> tag, it is due to a move or ability (like Knock Off).
 ///         Otherwise, it is because the item has destroyed itself (consumed Berries, Air Balloon).
 ///         If a berry is consumed, the <c>[eat]</c> tag will be included.
@@ -669,7 +669,7 @@ public sealed record ItemElement(string Pokemon, string Item) : ProtocolElement;
 public sealed record EndItemElement(string Pokemon, string Item) : ProtocolElement;
 
 /// <summary>
-///     The <see cref="Ability"/> of the <see cref="Pokemon"/> has been changed or revealed.
+///     The <see cref="Ability" /> of the <see cref="Pokemon" /> has been changed or revealed.
 ///     If this includes a <c>[from]EFFECT</c> tag, it is due to a move or ability <c>EFFECT</c>.
 ///     Otherwise, it's because the Pokémon has just switched in, and its ability is being announced to have a long-term effect.
 /// </summary>
@@ -784,9 +784,9 @@ public sealed record WaitingElement(string Source, string Target) : ProtocolElem
 
 /// <summary>
 ///     <para>
-///         The <see cref="Attacker"/> Pokémon is preparing to use a charge <see cref="Move"/> on the <see cref="Defender"/>. (For example: Sky Drop).
+///         The <see cref="Attacker" /> Pokémon is preparing to use a charge <see cref="Move" /> on the <see cref="Defender" />. (For example: Sky Drop).
 ///     </para>
-///     If <see cref="Defender"/> is <see langword="null"/>, the target is unknown. (For example: Dig, Fly).
+///     If <see cref="Defender" /> is <see langword="null" />, the target is unknown. (For example: Dig, Fly).
 /// </summary>
 [PublicAPI]
 [MinorAction]
@@ -806,7 +806,7 @@ public sealed record PrepareElement(string Attacker, string Move, string? Defend
 }
 
 /// <summary>
-///     The Pokémon <paramref name="Pokemon"/> must spend the turn recharging from a previous move.
+///     The Pokémon <paramref name="Pokemon" /> must spend the turn recharging from a previous move.
 /// </summary>
 [PublicAPI]
 [MinorAction]
@@ -834,7 +834,7 @@ public sealed record HitCountElement(string Pokemon, int Num) : ProtocolElement
 }
 
 /// <summary>
-///     The Pokémon ¿<see cref="Pokemon"/> used move <see cref="Move"/> which causes a temporary effect lasting the duration of the move.
+///     The Pokémon ¿<see cref="Pokemon" /> used move <see cref="Move" /> which causes a temporary effect lasting the duration of the move.
 ///     (For example: Grudge, Destiny Bond).
 /// </summary>
 [PublicAPI]
@@ -842,7 +842,7 @@ public sealed record HitCountElement(string Pokemon, int Num) : ProtocolElement
 public sealed record SingleMoveElement(string Pokemon, string Move) : ProtocolElement;
 
 /// <summary>
-///     The Pokémon <see cref="Pokemon"/> used move <see cref="Move"/> which causes a temporary effect lasting the duration of the turn.
+///     The Pokémon <see cref="Pokemon" /> used move <see cref="Move" /> which causes a temporary effect lasting the duration of the turn.
 ///     (For example: Protect, Focus Punch, Roost).
 /// </summary>
 [PublicAPI]

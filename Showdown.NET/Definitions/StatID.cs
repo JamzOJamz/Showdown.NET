@@ -6,6 +6,6 @@ public enum StatID
     Atk,
     Def,
     SpA,
-    SpDef,
+    SpD,
     Spe
 }

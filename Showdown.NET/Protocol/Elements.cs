@@ -79,7 +79,6 @@ public sealed record GameTypeElement(GameType GameType) : ProtocolElement
 ///         </item>
 ///     </list>
 /// </summary>
-
 [PublicAPI]
 public sealed record PlayerDetailsElement(int Player, string Username, string Avatar, string Rating) : ProtocolElement;
 
@@ -174,13 +173,17 @@ public sealed record WinElement(string Username) : ProtocolElement;
 ///         For the <see cref="Details" /> format, see <see cref="Definitions.Details" />.
 ///     </para>
 ///     <para>
-///         <see cref="Pokemon" /> and <see cref="Details" /> represent all the information that can be used to tell Pokémon apart.
-///         If two Pokémon have the same <see cref="Pokemon" /> and <see cref="Details" /> (which will never happen in any format with Species Clause),
+///         <see cref="Pokemon" /> and <see cref="Details" /> represent all the information that can be used to tell
+///         Pokémon apart.
+///         If two Pokémon have the same <see cref="Pokemon" /> and <see cref="Details" /> (which will never happen in any
+///         format with Species Clause),
 ///         you usually won't be able to tell if the same Pokémon switched in or a different Pokémon switched in.
 ///     </para>
 ///     <para>
-///         The switched Pokémon has HP <see cref="HP" />, and status <see cref="Status" />. <see cref="HP" /> is specified as a fraction; if it is your own Pokémon
-///         then it will be <c>CURRENT/MAX</c>, if not, it will be <c>/100</c> if HP Percentage Mod is in effect and <c>/48</c> otherwise.
+///         The switched Pokémon has HP <see cref="HP" />, and status <see cref="Status" />. <see cref="HP" /> is specified
+///         as a fraction; if it is your own Pokémon
+///         then it will be <c>CURRENT/MAX</c>, if not, it will be <c>/100</c> if HP Percentage Mod is in effect and
+///         <c>/48</c> otherwise.
 ///         <see cref="Status" /> can be left <see langword="null" />, or it can be <c>slp</c>, <c>par</c>, etc.
 ///     </para>
 /// </summary>
@@ -204,8 +207,10 @@ public sealed record DragElement(string Pokemon, string Details, string HP, stri
 
 /// <summary>
 ///     <para>
-///         The specified <see cref="Pokemon" /> has used move <see cref="Move" /> at <see cref="Target" />. If a move has multiple targets or no target,
-///         <see cref="Target" /> should be ignored. If a move targets a side, <see cref="Target" /> will be a (possibly fainted) Pokémon on that side.
+///         The specified <see cref="Pokemon" /> has used move <see cref="Move" /> at <see cref="Target" />. If a move has
+///         multiple targets or no target,
+///         <see cref="Target" /> should be ignored. If a move targets a side, <see cref="Target" /> will be a (possibly
+///         fainted) Pokémon on that side.
 ///     </para>
 ///     <see cref="Details" /> contains secondary information.
 /// </summary>
@@ -222,10 +227,12 @@ public struct MoveDetails(bool miss, bool still, string? anim)
     ///     If <see langword="true" />, the move missed.
     /// </summary>
     public bool Miss = miss;
+
     /// <summary>
     ///     If <see langword="true" />, no animation should play.
     /// </summary>
     public bool Still = still;
+
     /// <summary>
     ///     If not <see langword="null" />, contains the name of the move whose
     ///     animation should be used instead of the move that was actually used.
@@ -418,7 +425,11 @@ public sealed record TurnElement(int Number) : ProtocolElement
 
 /// <summary>
 ///     Gives a JSON object containing a request for a choice (to move or switch).
-///     See <a href="https://github.com/smogon/pokemon-showdown/blob/9562cec3897758c54b907cb29baf7573f3db4aec/sim/SIM-PROTOCOL.md#choice-requests">this</a>
+///     See
+///     <a
+///         href="https://github.com/smogon/pokemon-showdown/blob/9562cec3897758c54b907cb29baf7573f3db4aec/sim/SIM-PROTOCOL.md#choice-requests">
+///         this
+///     </a>
 ///     for a more in-depth explanation.
 /// </summary>
 [PublicAPI]
@@ -426,9 +437,10 @@ public sealed record RequestElement(string Request) : ProtocolElement;
 
 /// <summary>
 ///     <para>
-///         Exposes the members of <see cref="SplitElement{T}"/> non-generically. Handy for easier mass parsing of unknown elements.
+///         Exposes the members of <see cref="SplitElement{T}" /> non-generically. Handy for easier mass parsing of unknown
+///         elements.
 ///     </para>
-///     <see cref="Secret"/> should always be used for internal parsing.
+///     <see cref="Secret" /> should always be used for internal parsing.
 /// </summary>
 [PublicAPI]
 public interface ISplitElement
@@ -438,18 +450,19 @@ public interface ISplitElement
 }
 
 /// <summary>
-///     Contains two <see cref="ProtocolElement"/>s of the same type:
+///     Contains two <see cref="ProtocolElement" />s of the same type:
 ///     <list type="bullet">
 ///         <item>
-///             <see cref="Secret"/> is a message for the specific player or an omniscient observer (details which may
+///             <see cref="Secret" /> is a message for the specific player or an omniscient observer (details which may
 ///             contain information about exact details of the player's set, like exact HP).
 ///         </item>
 ///         <item>
-///             <see cref="Public"/> is a message with public details suitable for display to opponents / teammates / spectators.
+///             <see cref="Public" /> is a message with public details suitable for display to opponents / teammates /
+///             spectators.
 ///             Note that this may be empty.
 ///         </item>
 ///     </list>
-///     These can be exposed non-generically by casting the <see cref="ProtocolElement"/> to <see cref="ISplitElement"/>.
+///     These can be exposed non-generically by casting the <see cref="ProtocolElement" /> to <see cref="ISplitElement" />.
 /// </summary>
 [PublicAPI]
 public sealed record SplitElement<T>(int PlayerID, T Secret, T Public)
@@ -477,12 +490,14 @@ public sealed record DebugElement(string Message) : ProtocolElement;
 ///     Signals that a decision was sent which is somehow invalid:
 ///     <list type="bullet">
 ///         <item>
-///             If <see cref="Type"/> is <see cref="ErrorType.InvalidChoice"/>, an invalid decision was sent        
+///             If <see cref="Type" /> is <see cref="ErrorType.InvalidChoice" />, an invalid decision was sent
 ///             (trying to switch when you're trapped by Mean Look or something).
 ///         </item>
 ///         <item>
-///             If <see cref="Type"/> is <see cref="ErrorType.UnavailableChoice"/>, your previous choice revealed additional information
-///             (For example: a move disabled by Imprison or a trapping effect), and a <see cref="RequestElement"/> will be sent to follow up on.
+///             If <see cref="Type" /> is <see cref="ErrorType.UnavailableChoice" />, your previous choice revealed
+///             additional information
+///             (For example: a move disabled by Imprison or a trapping effect), and a <see cref="RequestElement" /> will
+///             be sent to follow up on.
 ///         </item>
 ///     </list>
 /// </summary>
@@ -490,13 +505,18 @@ public sealed record DebugElement(string Message) : ProtocolElement;
 public sealed record ErrorElement(ErrorType Type, string Message) : ProtocolElement;
 
 /// <summary>
-///     The type of error output by the Pokémon Showdown simulator, obtained in <see cref="ErrorElement"/>.
+///     The type of error output by the Pokémon Showdown simulator, obtained in <see cref="ErrorElement" />.
 /// </summary>
 [PublicAPI]
-public enum ErrorType { Other, InvalidChoice, UnavailableChoice };
+public enum ErrorType
+{
+    Other,
+    InvalidChoice,
+    UnavailableChoice
+}
 
 /// <summary>
-///     <see cref="ProtocolCodec"/> does not support this message type yet, so it is received as an unknown element.
+///     <see cref="ProtocolCodec" /> does not support this message type yet, so it is received as an unknown element.
 /// </summary>
 [PublicAPI]
 public sealed record UnknownElement(string Content) : ProtocolElement;

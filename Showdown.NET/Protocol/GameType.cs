@@ -2,5 +2,9 @@ namespace Showdown.NET.Protocol;
 
 public enum GameType
 {
-    Singles
+    Singles,
+    Doubles,
+    Triples,
+    Multi,
+    FreeForAll,
 }

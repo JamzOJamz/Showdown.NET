@@ -51,8 +51,8 @@ internal class Program
         var stream = new BattleStream();
 
         WriteAndLog(ProtocolCodec.EncodeStartCommand("gen7randombattle")); // >start {"formatid":"gen7randombattle"}
-        WriteAndLog(ProtocolCodec.EncodeSetPlayerCommand("p1", "Alice")); // >player p1 {"name":"Alice"}
-        WriteAndLog(ProtocolCodec.EncodeSetPlayerCommand("p2", "Bob")); // >player p2 {"name":"Bob"}
+        WriteAndLog(ProtocolCodec.EncodeSetPlayerCommand(1, "Alice")); // >player p1 {"name":"Alice"}
+        WriteAndLog(ProtocolCodec.EncodeSetPlayerCommand(2, "Bob")); // >player p2 {"name":"Bob"}
 
         // Alternative: Direct protocol commands (without ProtocolCodec)
         // stream.Write(">start {\"formatid\":\"gen7randombattle\"}");
@@ -113,12 +113,12 @@ internal class Program
         });
 
         WriteAndLog(ProtocolCodec.EncodeStartCommand("gen9customgame"));
-        WriteAndLog(ProtocolCodec.EncodeSetPlayerCommand("p1", "Red", p1Team));
-        WriteAndLog(ProtocolCodec.EncodeSetPlayerCommand("p2", "Green", p2Team));
-        WriteAndLog(ProtocolCodec.EncodePlayerChoiceCommand("p1", "team", "123456"));
-        WriteAndLog(ProtocolCodec.EncodePlayerChoiceCommand("p2", "team", "123456"));
-        WriteAndLog(ProtocolCodec.EncodePlayerChoiceCommand("p1", "move", "1"));
-        WriteAndLog(ProtocolCodec.EncodePlayerChoiceCommand("p2", "move", "1"));
+        WriteAndLog(ProtocolCodec.EncodeSetPlayerCommand(1, "Red", p1Team));
+        WriteAndLog(ProtocolCodec.EncodeSetPlayerCommand(2, "Green", p2Team));
+        WriteAndLog(ProtocolCodec.EncodePlayerChoiceCommand(1, "team", "123456"));
+        WriteAndLog(ProtocolCodec.EncodePlayerChoiceCommand(2, "team", "123456"));
+        WriteAndLog(ProtocolCodec.EncodePlayerChoiceCommand(1, "move", "1"));
+        WriteAndLog(ProtocolCodec.EncodePlayerChoiceCommand(2, "move", "1"));
 
         return outputTask;
 

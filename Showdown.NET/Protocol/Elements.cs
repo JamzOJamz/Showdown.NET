@@ -116,7 +116,7 @@ public sealed record ClearPokeElement : ProtocolElement;
 ///             <see cref="Player" /> is the player ID (see <see cref="PlayerDetailsElement" />).
 ///         </item>
 ///         <item>
-///             <see cref="Details" /> describes the Pokémon (see <see cref="Definitions.PokemonIdentifier" />).
+///             <see cref="Details" /> describes the Pokémon (see <see cref="Definitions.Details" />).
 ///         </item>
 ///         <item>
 ///             <see cref="Item" /> will be <c>item</c> if the Pokémon is holding an item, or blank if it isn't.
@@ -171,7 +171,7 @@ public sealed record WinElement(string Username) : ProtocolElement;
 ///         position, it is switched out).
 ///     </para>
 ///     <para>
-///         For the <see cref="Details" /> format, see <see cref="Definitions.PokemonIdentifier" />.
+///         For the <see cref="Details" /> format, see <see cref="Definitions.Details" />.
 ///     </para>
 ///     <para>
 ///         <see cref="Pokemon" /> and <see cref="Details" /> represent all the information that can be used to tell Pokémon apart.

@@ -475,7 +475,7 @@ module.exports = {
         }
     };
     
-    private readonly Dictionary<Uri, Document> _cache = new();
+    private readonly Dictionary<Uri, Document> _cache = [];
 
     public override Task<Document>? LoadDocumentAsync(DocumentSettings settings, DocumentInfo? sourceInfo,
         string specifier, DocumentCategory category,

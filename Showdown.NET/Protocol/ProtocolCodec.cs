@@ -238,20 +238,7 @@ public static class ProtocolCodec
 
             // Major actions
             case "move" when segments.Length > 3:
-                MoveDetails details = new();
-                if (segments.Length > 4)
-                {
-                    foreach (var tag in segments.AsSpan(4))
-                    {
-                        if (tag == "[miss]")
-                            details.Miss = true;
-                        else if (tag == "[still]")
-                            details.Still = true;
-                        else if (tag.StartsWith("[anim]"))
-                            details.Animation = tag[7..];
-                    }
-                }
-                elem = new MoveElement(segments[1], segments[2], segments[3], details);
+                elem = MoveElement.Parse(segments);
                 useTags = false;
                 break;
             case "switch" when segments.Length > 3:
@@ -263,6 +250,28 @@ public static class ProtocolCodec
                 (hp, status) = SwitchElement.ParseHPStatus(segments[3]);
                 elem = new DragElement(segments[1], segments[2], hp, status);
                 usedCount = 3;
+                break;
+            case "detailschange" when segments.Length > 3:
+                (hp, status) = SwitchElement.ParseHPStatus(segments[3]);
+                elem = new DetailsChangeElement(segments[1], segments[2], hp, status);
+                usedCount = 3;
+                break;
+            case "-formechange" when segments.Length > 3:
+                (hp, status) = SwitchElement.ParseHPStatus(segments[3]);
+                elem = new FormeChangeElement(segments[1], segments[2], hp, status);
+                usedCount = 3;
+                break;
+            case "replace" when segments.Length > 3:
+                (hp, status) = SwitchElement.ParseHPStatus(segments[3]);
+                elem = new ReplaceElement(segments[1], segments[2], hp, status);
+                usedCount = 3;
+                break;
+            case "swap" when segments.Length > 2:
+                elem = SwapElement.Parse(segments);
+                usedCount = 2;
+                break;
+            case "cant" when segments.Length > 2:
+                elem = CantElement.Parse(segments, out usedCount);
                 break;
             case "faint" when segments.Length > 1:
                 elem = new FaintElement(segments[1]);
@@ -288,6 +297,88 @@ public static class ProtocolCodec
                 elem = HealElement.Parse(segments[1], segments[2]);
                 usedCount = 2;
                 break;
+            case "-sethp" when segments.Length > 2:
+                elem = new SetHPElement(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "-status" when segments.Length > 2:
+                elem = new StatusElement(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "-curestatus" when segments.Length > 2:
+                elem = new CureStatusElement(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "-cureteam" when segments.Length > 1:
+                elem = new CureTeamElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "-boost" when segments.Length > 3:
+                var (stat, amount) = BoostElement.ParseBoost(segments);
+                elem = new BoostElement(segments[1], stat, amount);
+                usedCount = 3;
+                break;
+            case "-unboost" when segments.Length > 3:
+                (stat, amount) = BoostElement.ParseBoost(segments);
+                elem = new UnboostElement(segments[1], stat, amount);
+                usedCount = 3;
+                break;
+            case "-setboost" when segments.Length > 3:
+                (stat, amount) = BoostElement.ParseBoost(segments);
+                elem = new SetBoostElement(segments[1], stat, amount);
+                usedCount = 3;
+                break;
+            case "-swapboost" when segments.Length > 3:
+                var stats = SwapBoostElement.ParseSwapBoost(segments);
+                elem = new SwapBoostElement(segments[1], segments[2], stats);
+                usedCount = 3;
+                break;
+            case "-invertboost" when segments.Length > 1:
+                elem = new InvertBoostElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "-clearboost" when segments.Length > 1:
+                elem = new ClearBoostElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "-clearallboost":
+                elem = new ClearAllBoostElement();
+                break;
+            case "-clearpositiveboost" when segments.Length > 3:
+                elem = new ClearPositiveBoostElement(segments[1], segments[2], segments[3]);
+                usedCount = 3;
+                break;
+            case "-clearnegativeboost" when segments.Length > 1:
+                elem = new ClearNegativeBoostElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "-copyboost" when segments.Length > 2:
+                elem = new CopyBoostElement(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "-weather" when segments.Length > 1:
+                elem = WeatherElement.Parse(segments);
+                useTags = false;
+                break;
+            case "-fieldstart" when segments.Length > 1:
+                elem = new FieldStartElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "-fieldend" when segments.Length > 1:
+                elem = new FieldEndElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "-sidestart" when segments.Length > 2:
+                elem = SideStartElement.Parse(segments);
+                usedCount = 2;
+                break;
+            case "-sideend" when segments.Length > 2:
+                elem = SideEndElement.Parse(segments);
+                usedCount = 2;
+                break;
+            case "-swapsideconditions":
+                elem = new SwapSideConditionsElement();
+                break;
             case "-start" when segments.Length > 2:
                 elem = new StartVolatileElement(segments[1], segments[2]);
                 usedCount = 2;
@@ -312,12 +403,89 @@ public static class ProtocolCodec
                 elem = new ImmuneElement(segments[1]);
                 usedCount = 1;
                 break;
+            case "-item" when segments.Length > 2:
+                elem = new ItemElement(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "-enditem" when segments.Length > 2:
+                elem = new EndItemElement(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "-ability" when segments.Length > 2:
+                elem = new AbilityElement(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "-endability" when segments.Length > 1:
+                elem = new EndAbilityElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "-transform" when segments.Length > 2:
+                elem = new TransformElement(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "-mega" when segments.Length > 2:
+                elem = new MegaElement(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "-primal" when segments.Length > 1:
+                elem = new PrimalElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "-burst" when segments.Length > 3:
+                elem = new BurstElement(segments[1], segments[2], segments[3]);
+                usedCount = 3;
+                break;
+            case "-zpower" when segments.Length > 1:
+                elem = new ZPowerElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "-zbroken" when segments.Length > 1:
+                elem = new ZBrokenElement(segments[1]);
+                usedCount = 1;
+                break;
             case "-activate" when segments.Length > 2:
                 elem = new ActivateElement(segments[1], segments[2]);
                 usedCount = 2;
                 break;
+            case "-hint" when segments.Length > 1:
+                elem = new HintElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "-center":
+                elem = new CenterElement();
+                break;
+            case "-message" when segments.Length > 1:
+                elem = new MessageElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "-combine":
+                elem = new CombineElement();
+                usedCount = 1;
+                break;
+            case "-waiting" when segments.Length > 2:
+                elem = new WaitingElement(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "-prepare" when segments.Length > 2:
+                elem = PrepareElement.Parse(segments, out usedCount);
+                break;
+            case "-mustrecharge" when segments.Length > 1:
+                elem = new MustRechargeElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "-nothing":
+                elem = new NothingElement();
+                break;
             case "-hitcount" when segments.Length > 2:
                 elem = HitCountElement.Parse(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "-singlemove" when segments.Length > 2:
+                elem = new SingleMoveElement(segments[1], segments[2]);
+                usedCount = 2;
+                break;
+            case "-singleturn" when segments.Length > 2:
+                elem = new SingleTurnElement(segments[1], segments[2]);
                 usedCount = 2;
                 break;
 
@@ -327,14 +495,7 @@ public static class ProtocolCodec
                 usedCount = 1;
                 break;
             case "error" when segments.Length > 1:
-
-                var errorMsg = segments[1].TrimStart('[').Split(' ', 3);
-
-                ErrorType error = ErrorType.Other;
-                if (Enum.TryParse(errorMsg[0] + "Choice", out ErrorType specificError))
-                    error = specificError;
-
-                elem = new ErrorElement(error, error == ErrorType.Other ? segments[1] : errorMsg[2]);
+                elem = ErrorElement.Parse(segments[1]);
                 useTags = false;
                 break;
 

@@ -98,7 +98,7 @@ internal class ShowdownMemoryDocumentLoader(ZipArchive archive) : ShowdownDocume
             : relativePath; // File name
     }
 
-    private Uri ResolveFileUri(DocumentInfo? sourceInfo, string specifier)
+    private static Uri ResolveFileUri(DocumentInfo? sourceInfo, string specifier)
     {
         var baseUri = sourceInfo?.Uri ?? new Uri(VirtualRoot);
         var normalizedSpecifier = specifier.Replace("\\", "/");

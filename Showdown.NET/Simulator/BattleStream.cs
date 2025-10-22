@@ -50,7 +50,7 @@ public class BattleStream : IDisposable
     public async IAsyncEnumerable<string> ReadOutputsAsync()
     {
         ThrowIfDisposed();
-        while (true)
+        while (!IsDisposed)
         {
             var output = await ReadAsync();
             if (output == null) yield break;

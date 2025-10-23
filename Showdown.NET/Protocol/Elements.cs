@@ -98,7 +98,7 @@ public sealed record GenElement(int GenNum) : ProtocolElement
 ///     Will be sent if the game is official in some way.
 ///     <list type="bullet">
 ///         <item>
-///             If <see cref="Message"/> is <see langword="null"/>, the game will affect the player's ladder rating (Elo score).
+///             If <see cref="Message" /> is <see langword="null" />, the game will affect the player's ladder rating (Elo score).
 ///         </item>
 ///         <item>
 ///             Otherwise, indicates an official game that is not actually rated, such as being a tournament game.
@@ -293,7 +293,7 @@ public struct MoveDetails(bool miss, bool still, string? anim)
 ///         as a fraction; if it is your own Pokémon
 ///         then it will be <c>CURRENT/MAX</c>, if not, it will be <c>/100</c> if HP Percentage Mod is in effect and
 ///         <c>/48</c> otherwise.
-///         <see cref="Status" /> can be left <see cref="StatusID.None" />, or it can be <see cref="StatusID.Slp"/>, <see cref="StatusID.Par"/>, etc.
+///         <see cref="Status" /> can be left <see cref="StatusID.None" />, or it can be <see cref="StatusID.Slp" />, <see cref="StatusID.Par" />, etc.
 ///     </para>
 /// </summary>
 /// <remarks>
@@ -411,8 +411,8 @@ public sealed record BlockElement(string Pokemon, string Effect, string? Move, s
 }
 
 /// <summary>
-///     A move has failed due to their being no target Pokémon <see cref="Pokemon"/>. <see cref="Pokemon"/> is <see langword="null"/> in Generation 1.
-///     This action is specific to Generations 1-4 as in later Generations a failed move will display using <see cref="FailElement"/>.
+///     A move has failed due to their being no target Pokémon <see cref="Pokemon" />. <see cref="Pokemon" /> is <see langword="null" /> in Generation 1.
+///     This action is specific to Generations 1-4 as in later Generations a failed move will display using <see cref="FailElement" />.
 /// </summary>
 [PublicAPI]
 [MinorAction]

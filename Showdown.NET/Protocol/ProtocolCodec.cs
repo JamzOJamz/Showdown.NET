@@ -198,6 +198,12 @@ public static class ProtocolCodec
                 elem = new TierElement(segments[1]);
                 usedCount = 1;
                 break;
+            case "rated":
+                elem = RatedElement.Parse(segments, out usedCount);
+                break;
+            case "rule":
+                elem = RuleElement.Parse(segments);
+                break;
             case "clearpoke":
                 elem = new ClearPokeElement();
                 break;
@@ -220,6 +226,14 @@ public static class ProtocolCodec
                 elem = new RequestElement(segments[1]);
                 usedCount = 1;
                 break;
+            case "inactive" when segments.Length > 1:
+                elem = new InactiveElement(segments[1]);
+                usedCount = 1;
+                break;
+            case "inactiveoff" when segments.Length > 1:
+                elem = new InactiveOffElement(segments[1]);
+                usedCount = 1;
+                break;
             case "upkeep":
                 elem = new UpkeepElement();
                 break;
@@ -230,6 +244,9 @@ public static class ProtocolCodec
             case "win" when segments.Length > 1:
                 elem = new WinElement(segments[1]);
                 usedCount = 1;
+                break;
+            case "tie":
+                elem = new TieElement();
                 break;
             case "t:" when segments.Length > 1:
                 elem = TimestampElement.Parse(segments[1]);

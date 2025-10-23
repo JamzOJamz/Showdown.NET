@@ -97,11 +97,53 @@ public sealed record GenElement(int GenNum) : ProtocolElement
 }
 
 /// <summary>
-///     The name of the format being played. (see also <see cref="Definitions.FormatID" />).
+///     Will be sent if the game is official in some way.
+///     <list type="bullet">
+///         <item>
+///             If <see cref="Message"/> is <see langword="null"/>, the game will affect the player's ladder rating (Elo score).
+///         </item>
+///         <item>
+///             Otherwise, indicates an official game that is not actually rated, such as being a tournament game.
+///         </item>
+///     </list>
+/// </summary>
+[PublicAPI]
+public sealed record RatedElement(string? Message) : ProtocolElement
+{
+    public static RatedElement Parse(string[] segments, out int usedCount)
+    {
+        string? message = null;
+        usedCount = 0;
+
+        if (segments.Length > 1)
+        {
+            message = segments[1];
+            usedCount = 1;
+        }
+
+        return new RatedElement(message);
+    }
+}
+
+/// <summary>
+///     The name of the format being played. (see also <see cref="FormatID" />).
 /// </summary>
 /// <param name="FormatName"></param>
 [PublicAPI]
 public sealed record TierElement(string FormatName) : ProtocolElement;
+
+/// <summary>
+///     Will appear multiple times, one for each rule.
+/// </summary>
+[PublicAPI]
+public sealed record RuleElement(string Rule, string Description) : ProtocolElement
+{
+    public static RuleElement Parse(string[] segments)
+    {
+        var parts = segments[1].Split(':', 2, StringSplitOptions.TrimEntries);
+        return new RuleElement(parts[0], parts[1]);
+    }
+}
 
 /// <summary>
 ///     Marks the start of Team Preview.
@@ -164,6 +206,24 @@ public sealed record StartElement : ProtocolElement;
 /// </summary>
 [PublicAPI]
 public sealed record WinElement(string Username) : ProtocolElement;
+
+/// <summary>
+///     The battle has ended in a tie.
+/// </summary>
+[PublicAPI]
+public sealed record TieElement : ProtocolElement;
+
+/// <summary>
+///     A message related to the battle timer has been sent. The official client displays these messages in red.
+///     <see cref="InactiveElement" /> means that the timer is on at the time the message was sent,
+///     while <see cref="InactiveOffElement" /> means that the timer is off.
+/// </summary>
+[PublicAPI]
+public sealed record InactiveElement(string Message) : ProtocolElement;
+
+/// <inheritdoc cref="InactiveElement" />
+[PublicAPI]
+public sealed record InactiveOffElement(string Message) : ProtocolElement;
 
 /// <summary>
 ///     <para>

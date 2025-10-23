@@ -411,6 +411,29 @@ public sealed record BlockElement(string Pokemon, string Effect, string? Move, s
 }
 
 /// <summary>
+///     A move has failed due to their being no target Pokémon <see cref="Pokemon"/>. <see cref="Pokemon"/> is <see langword="null"/> in Generation 1.
+///     This action is specific to Generations 1-4 as in later Generations a failed move will display using <see cref="FailElement"/>.
+/// </summary>
+[PublicAPI]
+[MinorAction]
+public sealed record NoTargetElement(string? Pokemon) : ProtocolElement
+{
+    public static NoTargetElement Parse(string[] segments, out int usedCount)
+    {
+        string? pokemon = null;
+        usedCount = 0;
+
+        if (segments.Length > 1)
+        {
+            pokemon = segments[1];
+            usedCount = 1;
+        }
+
+        return new NoTargetElement(pokemon);
+    }
+}
+
+/// <summary>
 ///     The move used by the <see cref="Source" /> Pokémon missed (maybe absent) the <see cref="Target" /> Pokémon.
 /// </summary>
 [PublicAPI]

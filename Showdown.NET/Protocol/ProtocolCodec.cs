@@ -303,6 +303,9 @@ public static class ProtocolCodec
             case "-block" when segments.Length > 2:
                 elem = BlockElement.Parse(segments, out usedCount);
                 break;
+            case "-notarget":
+                elem = NoTargetElement.Parse(segments, out usedCount);
+                break;
             case "-miss" when segments.Length > 1:
                 elem = MissElement.Parse(segments, out usedCount);
                 break;

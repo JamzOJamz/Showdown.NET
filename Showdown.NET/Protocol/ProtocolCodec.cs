@@ -310,11 +310,11 @@ public static class ProtocolCodec
                 elem = MissElement.Parse(segments, out usedCount);
                 break;
             case "-damage" when segments.Length > 2:
-                elem = DamageElement.Parse(segments[1], segments[2]);
+                elem = DamageElement.Parse(segments[1], segments[2], heal: false);
                 usedCount = 2;
                 break;
             case "-heal" when segments.Length > 2:
-                elem = HealElement.Parse(segments[1], segments[2]);
+                elem = DamageElement.Parse(segments[1], segments[2], heal: true);
                 usedCount = 2;
                 break;
             case "-sethp" when segments.Length > 2:
@@ -322,11 +322,11 @@ public static class ProtocolCodec
                 usedCount = 2;
                 break;
             case "-status" when segments.Length > 2:
-                elem = new StatusElement(segments[1], segments[2]);
+                elem = StatusElement.Parse(segments, cure: false);
                 usedCount = 2;
                 break;
             case "-curestatus" when segments.Length > 2:
-                elem = new CureStatusElement(segments[1], segments[2]);
+                elem = StatusElement.Parse(segments, cure: true);
                 usedCount = 2;
                 break;
             case "-cureteam" when segments.Length > 1:
@@ -334,23 +334,19 @@ public static class ProtocolCodec
                 usedCount = 1;
                 break;
             case "-boost" when segments.Length > 3:
-                var (stat, amount) = BoostElement.ParseBoost(segments);
-                elem = new BoostElement(segments[1], stat, amount);
+                elem = BoostElement.Parse(segments, boost: true);
                 usedCount = 3;
                 break;
             case "-unboost" when segments.Length > 3:
-                (stat, amount) = BoostElement.ParseBoost(segments);
-                elem = new UnboostElement(segments[1], stat, amount);
+                elem = BoostElement.Parse(segments, boost: false);
                 usedCount = 3;
                 break;
             case "-setboost" when segments.Length > 3:
-                (stat, amount) = BoostElement.ParseBoost(segments);
-                elem = new SetBoostElement(segments[1], stat, amount);
+                elem = BoostElement.Parse(segments, boost: null);
                 usedCount = 3;
                 break;
             case "-swapboost" when segments.Length > 3:
-                var stats = SwapBoostElement.ParseSwapBoost(segments);
-                elem = new SwapBoostElement(segments[1], segments[2], stats);
+                elem = SwapBoostElement.Parse(segments);
                 usedCount = 3;
                 break;
             case "-invertboost" when segments.Length > 1:

@@ -91,9 +91,7 @@ public sealed record PlayerDetailsElement(int Player, string Username, string Av
 public sealed record GenElement(int GenNum) : ProtocolElement
 {
     public static GenElement Parse(string genNum)
-    {
-        return new GenElement(int.Parse(genNum));
-    }
+        => new(int.Parse(genNum));
 }
 
 /// <summary>
@@ -295,7 +293,7 @@ public struct MoveDetails(bool miss, bool still, string? anim)
 ///         as a fraction; if it is your own Pokémon
 ///         then it will be <c>CURRENT/MAX</c>, if not, it will be <c>/100</c> if HP Percentage Mod is in effect and
 ///         <c>/48</c> otherwise.
-///         <see cref="Status" /> can be left <see langword="null" />, or it can be <c>slp</c>, <c>par</c>, etc.
+///         <see cref="Status" /> can be left <see cref="StatusID.None" />, or it can be <see cref="StatusID.Slp"/>, <see cref="StatusID.Par"/>, etc.
 ///     </para>
 /// </summary>
 /// <remarks>
@@ -303,18 +301,20 @@ public struct MoveDetails(bool miss, bool still, string? anim)
 ///     which indicates it was unintentional (forced by Whirlwind, Roar, etc).
 /// </remarks>
 [PublicAPI]
-public sealed record SwitchElement(string Pokemon, string Details, string HP, string? Status) : ProtocolElement
+public sealed record SwitchElement(string Pokemon, string Details, string HP, StatusID Status) : ProtocolElement
 {
-    public static (string hp, string? status) ParseHPStatus(string hpStatus)
+    public static (string hp, StatusID status) ParseHPStatus(string hpStatus)
     {
         var parts = hpStatus.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return (parts[0], parts.Length > 1 ? parts[1] : null);
+        var hp = parts[0];
+        var status = parts.Length > 1 ? Enum.Parse<StatusID>(parts[1], true) : StatusID.None;
+        return (hp, status);
     }
 }
 
 /// <inheritdoc cref="SwitchElement" />
 [PublicAPI]
-public sealed record DragElement(string Pokemon, string Details, string HP, string? Status) : ProtocolElement;
+public sealed record DragElement(string Pokemon, string Details, string HP, StatusID Status) : ProtocolElement;
 
 /// <summary>
 ///     <para>
@@ -326,12 +326,12 @@ public sealed record DragElement(string Pokemon, string Details, string HP, stri
 ///     Syntax is the same as <see cref="SwitchElement" />.
 /// </summary>
 [PublicAPI]
-public sealed record DetailsChangeElement(string Pokemon, string Details, string HP, string? Status) : ProtocolElement;
+public sealed record DetailsChangeElement(string Pokemon, string Details, string HP, StatusID Status) : ProtocolElement;
 
 /// <inheritdoc cref="DetailsChangeElement" />
 [PublicAPI]
 [MinorAction]
-public sealed record FormeChangeElement(string Pokemon, string Species, string HP, string? Status) : ProtocolElement;
+public sealed record FormeChangeElement(string Pokemon, string Species, string HP, StatusID Status) : ProtocolElement;
 
 /// <summary>
 ///     <para>
@@ -341,7 +341,7 @@ public sealed record FormeChangeElement(string Pokemon, string Species, string H
 ///     <see cref="Pokemon" /> will be the NEW Pokémon ID - i.e. it will have the nickname of the Zoroark (or other Illusion user).
 /// </summary>
 [PublicAPI]
-public sealed record ReplaceElement(string Pokemon, string Details, string HP, string? Status) : ProtocolElement;
+public sealed record ReplaceElement(string Pokemon, string Details, string HP, StatusID Status) : ProtocolElement;
 
 /// <summary>
 ///     Moves already active <see cref="Pokemon" /> to active field <see cref="Position" /> where the leftmost position is 0 and each position to the right counts up by 1.
@@ -466,12 +466,16 @@ public sealed record MissElement(string Source, string? Target) : ProtocolElemen
 /// </summary>
 [PublicAPI]
 [MinorAction]
-public sealed record DamageElement(string Pokemon, string HP, string Status) : ProtocolElement
+public sealed record DamageElement(string Pokemon, string HP, StatusID Status) : ProtocolElement
 {
-    public static DamageElement Parse(string pokemon, string hpStatus)
+    public static ProtocolElement Parse(string pokemon, string hpStatus, bool heal)
     {
         var parts = hpStatus.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return new DamageElement(pokemon, parts[0], parts.Length > 1 ? parts[1] : string.Empty);
+        var hp = parts[0];
+        var status = parts.Length > 1 ? Enum.Parse<StatusID>(parts[1], true) : StatusID.None;
+        if (heal)
+            return new HealElement(pokemon, hp, status);
+        return new DamageElement(pokemon, hp, status);
     }
 }
 
@@ -480,14 +484,7 @@ public sealed record DamageElement(string Pokemon, string HP, string Status) : P
 /// </summary>
 [PublicAPI]
 [MinorAction]
-public sealed record HealElement(string Pokemon, string HP, string Status) : ProtocolElement
-{
-    public static HealElement Parse(string pokemon, string hpStatus)
-    {
-        var parts = hpStatus.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return new HealElement(pokemon, parts[0], parts.Length > 1 ? parts[1] : string.Empty);
-    }
-}
+public sealed record HealElement(string Pokemon, string HP, StatusID Status) : ProtocolElement;
 
 /// <summary>
 ///     The specified Pokémon <see cref="Pokemon" /> now has <see cref="HP" /> hit points.
@@ -501,14 +498,23 @@ public sealed record SetHPElement(string Pokemon, string HP) : ProtocolElement;
 /// </summary>
 [PublicAPI]
 [MinorAction]
-public sealed record StatusElement(string Pokemon, string Status) : ProtocolElement;
+public sealed record StatusElement(string Pokemon, StatusID Status) : ProtocolElement
+{
+    public static ProtocolElement Parse(string[] segments, bool cure)
+    {
+        var status = Enum.Parse<StatusID>(segments[2], true);
+        if (cure)
+            return new CureStatusElement(segments[1], status);
+        return new StatusElement(segments[1], status);
+    }
+}
 
 /// <summary>
 ///     The Pokémon <see cref="Pokemon" /> has recovered from <see cref="Status" />.
 /// </summary>
 [PublicAPI]
 [MinorAction]
-public sealed record CureStatusElement(string Pokemon, string Status) : ProtocolElement;
+public sealed record CureStatusElement(string Pokemon, StatusID Status) : ProtocolElement;
 
 /// <summary>
 ///     The Pokémon <see cref="Pokemon" /> has used a move that cures its team of status effects, like Heal Bell.
@@ -524,9 +530,19 @@ public sealed record CureTeamElement(string Pokemon) : ProtocolElement;
 [MinorAction]
 public sealed record BoostElement(string Pokemon, StatID Stat, int Amount) : ProtocolElement
 {
-    public static (StatID stat, int amount) ParseBoost(string[] segments)
+    public static ProtocolElement Parse(string[] segments, bool? boost)
     {
-        return (Enum.Parse<StatID>(segments[2], true), int.Parse(segments[3]));
+        var pokemon = segments[1];
+        var stat = Enum.Parse<StatID>(segments[2], true);
+        var amount = int.Parse(segments[3]);
+
+        if (boost.HasValue)
+        {
+            if (boost.Value)
+                return new BoostElement(pokemon, stat, amount);
+            return new UnboostElement(pokemon, stat, amount);
+        }
+        return new SetBoostElement(pokemon, stat, amount);
     }
 }
 
@@ -553,7 +569,7 @@ public sealed record SetBoostElement(string Pokemon, StatID Stat, int Amount) : 
 [MinorAction]
 public sealed record SwapBoostElement(string Source, string Target, StatID[] Stats) : ProtocolElement
 {
-    public static StatID[] ParseSwapBoost(string[] segments)
+    public static SwapBoostElement Parse(string[] segments)
     {
         string[] statsStr = segments[3].Split(',');
         StatID[] stats = new StatID[statsStr.Length];
@@ -561,7 +577,7 @@ public sealed record SwapBoostElement(string Source, string Target, StatID[] Sta
         for (int i = 0; i < statsStr.Length; i++)
             stats[i] = Enum.Parse<StatID>(statsStr[i], true);
 
-        return stats;
+        return new SwapBoostElement(segments[1], segments[2], stats);
     }
 }
 

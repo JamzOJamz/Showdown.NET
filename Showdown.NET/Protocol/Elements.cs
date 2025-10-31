@@ -165,7 +165,7 @@ public sealed record ClearPokeElement : ProtocolElement;
 ///     Note that forme and shininess are hidden on this, unlike on the <see cref="SwitchElement" /> details message.
 /// </summary>
 [PublicAPI]
-public sealed record PokeElement(int Player, string Details, string Item) : ProtocolElement;
+public sealed record PokeElement(int Player, string Details, string Item) : ProtocolElement, IDetailsArg;
 
 /// <summary>
 ///     These messages appear if you're playing a format that uses team previews.
@@ -301,7 +301,7 @@ public struct MoveDetails(bool miss, bool still, string? anim)
 ///     which indicates it was unintentional (forced by Whirlwind, Roar, etc).
 /// </remarks>
 [PublicAPI]
-public sealed record SwitchElement(string Pokemon, string Details, string HP, StatusID Status) : ProtocolElement, IPokemonArgs
+public sealed record SwitchElement(string Pokemon, string Details, string HP, StatusID Status) : ProtocolElement, IPokemonArgs, IDetailsArg
 {
     public static (string hp, StatusID status) ParseHPStatus(string hpStatus)
     {
@@ -314,7 +314,7 @@ public sealed record SwitchElement(string Pokemon, string Details, string HP, St
 
 /// <inheritdoc cref="SwitchElement" />
 [PublicAPI]
-public sealed record DragElement(string Pokemon, string Details, string HP, StatusID Status) : ProtocolElement, IPokemonArgs;
+public sealed record DragElement(string Pokemon, string Details, string HP, StatusID Status) : ProtocolElement, IPokemonArgs, IDetailsArg;
 
 /// <summary>
 ///     <para>
@@ -326,7 +326,7 @@ public sealed record DragElement(string Pokemon, string Details, string HP, Stat
 ///     Syntax is the same as <see cref="SwitchElement" />.
 /// </summary>
 [PublicAPI]
-public sealed record DetailsChangeElement(string Pokemon, string Details, string HP, StatusID Status) : ProtocolElement, IPokemonArgs;
+public sealed record DetailsChangeElement(string Pokemon, string Details, string HP, StatusID Status) : ProtocolElement, IPokemonArgs, IDetailsArg;
 
 /// <inheritdoc cref="DetailsChangeElement" />
 [PublicAPI]
@@ -341,7 +341,7 @@ public sealed record FormeChangeElement(string Pokemon, string Species, string H
 ///     <see cref="Pokemon" /> will be the NEW Pokémon ID - i.e. it will have the nickname of the Zoroark (or other Illusion user).
 /// </summary>
 [PublicAPI]
-public sealed record ReplaceElement(string Pokemon, string Details, string HP, StatusID Status) : ProtocolElement, IPokemonArgs;
+public sealed record ReplaceElement(string Pokemon, string Details, string HP, StatusID Status) : ProtocolElement, IPokemonArgs, IDetailsArg;
 
 /// <summary>
 ///     Moves already active <see cref="Pokemon" /> to active field <see cref="Position" /> where the leftmost position is 0 and each position to the right counts up by 1.
@@ -1083,4 +1083,9 @@ public interface IPokemonArgs
     string? Target => null;
     string? Attacker => null;
     string? Defender => null;
+}
+
+public interface IDetailsArg
+{
+    string Details { get; }
 }

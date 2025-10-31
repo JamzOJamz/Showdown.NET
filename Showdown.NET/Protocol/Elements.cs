@@ -411,7 +411,7 @@ public sealed record BlockElement(string Pokemon, string Effect, string? Move, s
 }
 
 /// <summary>
-///     A move has failed due to their being no target Pokémon <see cref="Pokemon" />. <see cref="Pokemon" /> is <see langword="null" /> in Generation 1.
+///     A move has failed due to there being no target Pokémon <see cref="Pokemon" />. <see cref="Pokemon" /> is <see langword="null" /> in Generation 1.
 ///     This action is specific to Generations 1-4 as in later Generations a failed move will display using <see cref="FailElement" />.
 /// </summary>
 [PublicAPI]

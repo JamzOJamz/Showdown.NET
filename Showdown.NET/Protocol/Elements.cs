@@ -676,10 +676,10 @@ public sealed record FieldEndElement(string Condition) : ProtocolElement;
 /// </summary>
 [PublicAPI]
 [MinorAction]
-public sealed record SideStartElement(int Side, string Condition) : ProtocolElement
+public sealed record SideStartElement(Side Side, string Condition) : ProtocolElement
 {
     public static SideStartElement Parse(string[] segments)
-        => new(int.Parse(segments[1]), segments[2]);
+        => new(Side.Parse(segments[1]), segments[2]);
 }
 
 /// <summary>
@@ -687,10 +687,10 @@ public sealed record SideStartElement(int Side, string Condition) : ProtocolElem
 /// </summary>
 [PublicAPI]
 [MinorAction]
-public sealed record SideEndElement(int Side, string Condition) : ProtocolElement
+public sealed record SideEndElement(Side Side, string Condition) : ProtocolElement
 {
     public static SideEndElement Parse(string[] segments)
-        => new(int.Parse(segments[1]), segments[2]);
+        => new(Side.Parse(segments[1]), segments[2]);
 }
 
 /// <summary>

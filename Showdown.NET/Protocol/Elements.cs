@@ -990,6 +990,7 @@ public interface ISplitElement
 {
     ProtocolElement Secret { get; }
     ProtocolElement Public { get; }
+    int PlayerID { get; }
 }
 
 /// <summary>

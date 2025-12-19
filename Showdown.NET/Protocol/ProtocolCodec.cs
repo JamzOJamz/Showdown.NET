@@ -4,9 +4,28 @@ using Showdown.NET.Simulator;
 
 namespace Showdown.NET.Protocol;
 
+/// <summary>
+/// Provides encoding and decoding functions for the Pokémon Showdown battle protocol.
+/// </summary>
+/// <remarks>
+/// This class contains methods to encode commands to send to the battle simulator
+/// and parse responses received from it. The protocol uses a text-based format
+/// with pipe-delimited fields.
+/// </remarks>
 [PublicAPI]
 public static class ProtocolCodec
 {
+    /// <summary>
+    /// Encodes a battle start command.
+    /// </summary>
+    /// <param name="formatId">The battle format ID (e.g., "gen9customgame").</param>
+    /// <returns>An encoded command string ready to send to the battle stream.</returns>
+    /// <example>
+    /// <code>
+    /// var command = ProtocolCodec.EncodeStartCommand("gen7randombattle");
+    /// // Returns: "&gt;start {\"formatid\":\"gen7randombattle\"}"
+    /// </code>
+    /// </example>
     public static string EncodeStartCommand(string formatId)
     {
         var payload = new { formatid = formatId };
@@ -14,12 +33,32 @@ public static class ProtocolCodec
         return $">start {json}";
     }
 
+    /// <summary>
+    /// Encodes a command to set player information without a team.
+    /// </summary>
+    /// <param name="player">The player number (1 or 2).</param>
+    /// <param name="name">The player's name.</param>
+    /// <returns>An encoded command string ready to send to the battle stream.</returns>
     public static string EncodeSetPlayerCommand(int player, string name)
         => EncodeSetPlayerCommandInternal(player, name, null);
 
+    /// <summary>
+    /// Encodes a command to set player information with a team.
+    /// </summary>
+    /// <param name="player">The player number (1 or 2).</param>
+    /// <param name="name">The player's name.</param>
+    /// <param name="team">Optional team as an array of PokemonSet objects.</param>
+    /// <returns>An encoded command string ready to send to the battle stream.</returns>
     public static string EncodeSetPlayerCommand(int player, string name, PokemonSet[]? team = null)
         => EncodeSetPlayerCommandInternal(player, name, team);
 
+    /// <summary>
+    /// Encodes a command to set player information with a team string.
+    /// </summary>
+    /// <param name="player">The player number (1 or 2).</param>
+    /// <param name="name">The player's name.</param>
+    /// <param name="team">Optional team as a packed team string.</param>
+    /// <returns>An encoded command string ready to send to the battle stream.</returns>
     public static string EncodeSetPlayerCommand(int player, string name, string? team = null)
         => EncodeSetPlayerCommandInternal(player, name, team);
 
@@ -37,6 +76,23 @@ public static class ProtocolCodec
         return $">player p{player} {json}";
     }
 
+    /// <summary>
+    /// Encodes a player choice command (e.g., move selection, switch).
+    /// </summary>
+    /// <param name="player">The player number (1 or 2).</param>
+    /// <param name="args">
+    /// Choice arguments. Examples: ["move", "1"], ["switch", "2"], ["team", "123456"].
+    /// </param>
+    /// <returns>An encoded command string ready to send to the battle stream.</returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown when no arguments are provided.
+    /// </exception>
+    /// <example>
+    /// <code>
+    /// var moveCommand = ProtocolCodec.EncodePlayerChoiceCommand(1, "move", "1");
+    /// // Returns: "&gt;p1 move 1"
+    /// </code>
+    /// </example>
     public static string EncodePlayerChoiceCommand(int player, params string[] args)
     {
         if (args.Length == 0)
@@ -46,6 +102,18 @@ public static class ProtocolCodec
         return $">p{player} {command}";
     }
 
+    /// <summary>
+    /// Parses a protocol message from the battle simulator into a structured frame.
+    /// </summary>
+    /// <param name="message">The raw message string from the battle stream.</param>
+    /// <returns>
+    /// A <see cref="ProtocolFrame"/> containing parsed protocol elements,
+    /// or null if the message is empty or unrecognized.
+    /// </returns>
+    /// <remarks>
+    /// The protocol supports three main frame types: UpdateFrame, SideUpdateFrame, and EndFrame.
+    /// Each frame contains protocol elements representing battle events.
+    /// </remarks>
     public static ProtocolFrame? Parse(string message)
     {
         if (string.IsNullOrWhiteSpace(message))

@@ -3,6 +3,19 @@ using JetBrains.Annotations;
 
 namespace Showdown.NET.Simulator;
 
+/// <summary>
+/// Represents a Pokémon set including species, moves, stats, and other battle-relevant data.
+/// </summary>
+/// <remarks>
+/// <para>
+/// This class is used to define a Pokémon's complete battle configuration including
+/// its species, moves, ability, item, EVs, IVs, nature, and other attributes.
+/// </para>
+/// <para>
+/// All string properties that accept IDs or names (like species, moves, items, abilities)
+/// should be converted to lowercase IDs before sending to the simulator.
+/// </para>
+/// </remarks>
 [PublicAPI]
 public class PokemonSet
 {
@@ -50,6 +63,9 @@ public class PokemonSet
     [JsonPropertyName("nature")]
     public string Nature { get; set; } = "";
     
+    /// <summary>
+    /// The Pokémon's gender (typically "M", "F", or empty for genderless).
+    /// </summary>
     [JsonPropertyName("gender")]
     public string Gender { get; set; } = "";
 
@@ -136,6 +152,9 @@ public class PokemonSet
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? DynamaxLevel { get; set; }
     
+    /// <summary>
+    /// Whether this Pokémon has the Gigantamax factor (Gen 8+).
+    /// </summary>
     [JsonPropertyName("gigantamax")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? Gigantamax { get; set; }

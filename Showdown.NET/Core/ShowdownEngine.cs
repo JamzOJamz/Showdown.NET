@@ -8,6 +8,11 @@ namespace Showdown.NET.Core;
 
 internal sealed class ShowdownEngine : IDisposable
 {
+    private const string GlobalObjectName = "global";
+    private const string HostFsObjectName = "hostFs";
+    private const string HostThrowFunctionName = "hostThrow";
+    private const string HostCryptoObjectName = "hostCrypto";
+    
     private bool _disposed;
 
     public ShowdownEngine(string showdownDistPath)
@@ -76,13 +81,13 @@ internal sealed class ShowdownEngine : IDisposable
     {
         // Engine.AddHostType("Console", typeof(Console)); // For debugging
 
-        Engine.AddHostObject("global", new { });
+        Engine.AddHostObject(GlobalObjectName, new { });
 
-        Engine.AddHostObject("hostFs", new
+        Engine.AddHostObject(HostFsObjectName, new
         {
             readdirSync = new Func<string, object[]>(path =>
             {
-                if (!path.StartsWith("vfs://"))
+                if (!path.StartsWith("vfs://", StringComparison.Ordinal))
                     return Directory.GetFileSystemEntries(path).Select(Path.GetFileName)!.ToArray<object>();
 
                 // Special handling when using virtual file system
@@ -91,9 +96,9 @@ internal sealed class ShowdownEngine : IDisposable
             })
         });
 
-        Engine.AddHostObject("hostThrow", new Action<string>(code => throw new Exception(code)));
+        Engine.AddHostObject(HostThrowFunctionName, new Action<string>(code => throw new Exception(code)));
 
-        Engine.AddHostObject("hostCrypto", new
+        Engine.AddHostObject(HostCryptoObjectName, new
         {
             getRandomValues = new Func<object, object>(array =>
             {

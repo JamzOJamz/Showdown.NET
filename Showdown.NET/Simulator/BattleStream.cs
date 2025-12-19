@@ -135,6 +135,9 @@ public class BattleStream : IDisposable
         throw new ObjectDisposedException(nameof(BattleStream));
     }
     
+    /// <summary>
+    /// Releases all resources used by this <see cref="BattleStream"/> instance.
+    /// </summary>
     public void Dispose()
     {
         Dispose(true);

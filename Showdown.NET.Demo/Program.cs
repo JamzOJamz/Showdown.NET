@@ -1,4 +1,4 @@
-﻿using Showdown.NET.Protocol;
+﻿﻿using Showdown.NET.Protocol;
 using Showdown.NET.Simulator;
 
 namespace Showdown.NET.Demo;
@@ -43,38 +43,18 @@ internal class Program
         }
     }
 
-    private static async Task RunBasicDemo()
+    private static Task RunBasicDemo()
     {
         Console.Clear();
 
-        // BattleStream handles communication with the simulator
         var stream = new BattleStream();
+        var outputTask = PrintOutputsToConsole(stream);
 
-        WriteAndLog(ProtocolCodec.EncodeStartCommand("gen7randombattle")); // >start {"formatid":"gen7randombattle"}
-        WriteAndLog(ProtocolCodec.EncodeSetPlayerCommand(1, "Alice")); // >player p1 {"name":"Alice"}
-        WriteAndLog(ProtocolCodec.EncodeSetPlayerCommand(2, "Bob")); // >player p2 {"name":"Bob"}
+        WriteAndLog(stream, ProtocolCodec.EncodeStartCommand("gen7randombattle")); // >start {"formatid":"gen7randombattle"}
+        WriteAndLog(stream, ProtocolCodec.EncodeSetPlayerCommand(1, "Alice")); // >player p1 {"name":"Alice"}
+        WriteAndLog(stream, ProtocolCodec.EncodeSetPlayerCommand(2, "Bob")); // >player p2 {"name":"Bob"}
 
-        // Alternative: Direct protocol commands (without ProtocolCodec)
-        // stream.Write(">start {\"formatid\":\"gen7randombattle\"}");
-        // stream.Write(">player p1 {\"name\":\"Alice\"}");
-        // stream.Write(">player p2 {\"name\":\"Bob\"}");
-
-        // Print all simulator outputs (battle updates, logs, etc.)
-        await foreach (var output in stream.ReadOutputsAsync())
-        {
-            Console.WriteLine($"[<<<] {output}");
-
-            // var parsed = ProtocolCodec.Parse(output);
-            // Work with parsed message here
-        }
-
-        return;
-
-        void WriteAndLog(string command)
-        {
-            Console.WriteLine($"[>>>] {command}");
-            stream.Write(command);
-        }
+        return outputTask;
     }
 
     private static Task RunScriptedBattleDemo()
@@ -102,41 +82,23 @@ internal class Program
         };
 
         var stream = new BattleStream();
+        var outputTask = PrintOutputsToConsole(stream);
 
-        // Task to print outputs asynchronously
-        var outputTask = Task.Run(async () =>
-        {
-            await foreach (var output in stream.ReadOutputsAsync())
-            {
-                Console.WriteLine($"[<<<] {output}");
-            }
-        });
-
-        WriteAndLog(ProtocolCodec.EncodeStartCommand("gen9customgame"));
-        WriteAndLog(ProtocolCodec.EncodeSetPlayerCommand(1, "Red", p1Team));
-        WriteAndLog(ProtocolCodec.EncodeSetPlayerCommand(2, "Green", p2Team));
-        WriteAndLog(ProtocolCodec.EncodePlayerChoiceCommand(1, "team", "123456"));
-        WriteAndLog(ProtocolCodec.EncodePlayerChoiceCommand(2, "team", "123456"));
-        WriteAndLog(ProtocolCodec.EncodePlayerChoiceCommand(1, "move", "1"));
-        WriteAndLog(ProtocolCodec.EncodePlayerChoiceCommand(2, "move", "1"));
+        WriteAndLog(stream, ProtocolCodec.EncodeStartCommand("gen9customgame"));
+        WriteAndLog(stream, ProtocolCodec.EncodeSetPlayerCommand(1, "Red", p1Team));
+        WriteAndLog(stream, ProtocolCodec.EncodeSetPlayerCommand(2, "Green", p2Team));
+        WriteAndLog(stream, ProtocolCodec.EncodePlayerChoiceCommand(1, "team", "123456"));
+        WriteAndLog(stream, ProtocolCodec.EncodePlayerChoiceCommand(2, "team", "123456"));
+        WriteAndLog(stream, ProtocolCodec.EncodePlayerChoiceCommand(1, "move", "1"));
+        WriteAndLog(stream, ProtocolCodec.EncodePlayerChoiceCommand(2, "move", "1"));
 
         return outputTask;
-
-        void WriteAndLog(string command)
-        {
-            Console.WriteLine($"[>>>] {command}");
-            stream.Write(command);
-        }
     }
 
     private static Task RunReplDemo()
     {
         var stream = new BattleStream();
-
-        Task.Run(async () =>
-        {
-            await foreach (var output in stream.ReadOutputsAsync()) Console.WriteLine(output);
-        });
+        Task.Run(async () => await PrintOutputsToConsole(stream));
 
         Console.Clear();
         Console.WriteLine("Pokémon Showdown Battle Simulator REPL started. Type commands and press Enter.");
@@ -161,5 +123,22 @@ internal class Program
 
         Console.WriteLine("Exiting REPL...");
         return Task.CompletedTask;
+    }
+
+    private static void WriteAndLog(BattleStream stream, string command)
+    {
+        Console.WriteLine($"[>>>] {command}");
+        stream.Write(command);
+    }
+
+    private static async Task PrintOutputsToConsole(BattleStream stream)
+    {
+        await foreach (var output in stream.ReadOutputsAsync())
+        {
+            Console.WriteLine($"[<<<] {output}");
+            
+            // var parsed = ProtocolCodec.Parse(output);
+            // Work with parsed message here
+        }
     }
 }

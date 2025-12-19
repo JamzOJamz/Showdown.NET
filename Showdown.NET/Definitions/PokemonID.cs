@@ -34,7 +34,8 @@ public readonly record struct PokemonID(int Player, char? Position, string Name)
 }
 
 /// <summary>
-///     A comma-separated list of all information about a Pokémon visible on the battle screen: species, shininess, gender, and level.
+///     A comma-separated list of all information about a Pokémon visible on the battle screen: species, shininess, gender,
+///     and level.
 /// </summary>
 public readonly record struct Details(string Species, int Level, char? Gender, bool Shiny, string? Terastallized)
 {

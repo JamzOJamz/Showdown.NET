@@ -240,12 +240,21 @@ public sealed record MoveElement(string Pokemon, string Move, string Target, Mov
         {
             foreach (var tag in segments.AsSpan(4))
             {
-                if (tag == "[miss]")
-                    details.Miss = true;
-                else if (tag == "[still]")
-                    details.Still = true;
-                else if (tag.StartsWith("[anim]"))
-                    details.Animation = tag[7..];
+                switch (tag)
+                {
+                    case "[miss]":
+                        details.Miss = true;
+                        break;
+                    case "[still]":
+                        details.Still = true;
+                        break;
+                    default:
+                    {
+                        if (tag.StartsWith("[anim]"))
+                            details.Animation = tag[7..];
+                        break;
+                    }
+                }
             }
         }
         return new MoveElement(segments[1], segments[2], segments[3], details);

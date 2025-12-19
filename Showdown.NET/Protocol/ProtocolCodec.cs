@@ -39,6 +39,9 @@ public static class ProtocolCodec
     /// <param name="player">The player number (1 or 2).</param>
     /// <param name="name">The player's name.</param>
     /// <returns>An encoded command string ready to send to the battle stream.</returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="name"/> is null.
+    /// </exception>
     public static string EncodeSetPlayerCommand(int player, string name)
         => EncodeSetPlayerCommandInternal(player, name, null);
 
@@ -49,6 +52,9 @@ public static class ProtocolCodec
     /// <param name="name">The player's name.</param>
     /// <param name="team">Optional team as an array of PokemonSet objects.</param>
     /// <returns>An encoded command string ready to send to the battle stream.</returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="name"/> is null.
+    /// </exception>
     public static string EncodeSetPlayerCommand(int player, string name, PokemonSet[]? team = null)
         => EncodeSetPlayerCommandInternal(player, name, team);
 
@@ -59,11 +65,16 @@ public static class ProtocolCodec
     /// <param name="name">The player's name.</param>
     /// <param name="team">Optional team as a packed team string.</param>
     /// <returns>An encoded command string ready to send to the battle stream.</returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="name"/> is null.
+    /// </exception>
     public static string EncodeSetPlayerCommand(int player, string name, string? team = null)
         => EncodeSetPlayerCommandInternal(player, name, team);
 
     private static string EncodeSetPlayerCommandInternal(int player, string name, object? team)
     {
+        ArgumentNullException.ThrowIfNull(name);
+        
         var payload = new Dictionary<string, object?>
         {
             ["name"] = name

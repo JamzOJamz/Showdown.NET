@@ -78,11 +78,16 @@ public class BattleStream : IDisposable
     /// </summary>
     /// <returns>
     /// A task representing the asynchronous operation. The task result contains
-    /// the next output string from the simulator, or null if the stream has ended.
+    /// the next output string from the simulator, or null if the stream has ended
+    /// (battle is complete or no more outputs are available).
     /// </returns>
     /// <exception cref="ObjectDisposedException">
     /// Thrown when this instance has been disposed.
     /// </exception>
+    /// <remarks>
+    /// This method returns null when the battle completes and there are no more outputs.
+    /// Use <see cref="ReadOutputsAsync"/> for automatic enumeration until completion.
+    /// </remarks>
     public async Task<string?> ReadAsync()
     {
         ThrowIfDisposed();

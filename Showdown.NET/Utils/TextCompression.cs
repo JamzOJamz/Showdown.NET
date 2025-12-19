@@ -43,6 +43,9 @@ public static class TextCompression
     /// The decompressed text string. If the data is smaller than the compression threshold,
     /// it's treated as uncompressed UTF-8 text.
     /// </returns>
+    /// <exception cref="InvalidDataException">
+    /// Thrown when the data is not valid Brotli-compressed data (for data larger than the threshold).
+    /// </exception>
     public static string Decompress(ReadOnlySpan<byte> data)
     {
         // Optional: could mark compressed vs raw with a prefix byte

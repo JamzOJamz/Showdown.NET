@@ -103,6 +103,28 @@ public static class ProtocolCodec
     }
 
     /// <summary>
+    ///     Encodes a JavaScript evaluation command.
+    /// </summary>
+    /// <param name="js">The JavaScript code to evaluate.</param>
+    /// <param name="ensureSemicolon">
+    ///     If true, ensures the JavaScript code ends with a semicolon.
+    ///     Defaults to false.
+    /// </param>
+    /// <returns>An encoded command string ready to send to the battle stream.</returns>
+    /// <exception cref="ArgumentException">
+    ///     Thrown when the provided JavaScript code is null or empty.
+    /// </exception>
+    public static string EncodeEvalCommand(string js, bool ensureSemicolon = false)
+    {
+        if (string.IsNullOrEmpty(js))
+            throw new ArgumentException("JavaScript code to evaluate cannot be null or empty", nameof(js));
+
+        var code = js.Trim();
+        if (ensureSemicolon && code.Length > 0 && !code.EndsWith(';')) code += ";";
+        return $">eval {code}";
+    }
+
+    /// <summary>
     ///     Parses a protocol message from the battle simulator into a structured frame.
     /// </summary>
     /// <param name="message">The raw message string from the battle stream.</param>
@@ -227,10 +249,25 @@ public static class ProtocolCodec
     {
         var trimmedLine = line.Trim();
 
+        // All protocol elements must start with '|'
         if (!trimmedLine.StartsWith('|'))
             return null;
 
-        var segments = trimmedLine[1..].Split('|');
+        // Handle eval input commands (||>>> code)
+        if (trimmedLine.StartsWith("||>>>"))
+        {
+            return new EvalInputElement(trimmedLine[6..]);
+        }
+
+        // Handle eval output commands (||<<< result)
+        if (trimmedLine.StartsWith("||<<<"))
+        {
+            return new EvalOutputElement(trimmedLine[6..]);
+        }
+
+        // Standard protocol elements use '|' as field delimiter
+        // Format: |command|arg1|arg2|...
+        var segments = trimmedLine[1..].Split('|'); // Remove leading '|' and split
 
         if (segments.Length < 1)
             return null;

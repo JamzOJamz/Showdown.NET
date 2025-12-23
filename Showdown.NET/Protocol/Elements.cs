@@ -98,7 +98,8 @@ public sealed record GenElement(int GenNum) : ProtocolElement
 ///     Will be sent if the game is official in some way.
 ///     <list type="bullet">
 ///         <item>
-///             If <see cref="Message" /> is <see langword="null" />, the game will affect the player's ladder rating (Elo score).
+///             If <see cref="Message" /> is <see langword="null" />, the game will affect the player's ladder rating (Elo
+///             score).
 ///         </item>
 ///         <item>
 ///             Otherwise, indicates an official game that is not actually rated, such as being a tournament game.
@@ -225,13 +226,16 @@ public sealed record InactiveOffElement(string Message) : ProtocolElement;
 
 /// <summary>
 ///     <para>
-///         The specified <see cref="Pokemon" /> has used move <see cref="Move" /> at <see cref="Target" />. If a move has multiple targets or no target,
-///         <see cref="Target" /> should be ignored. If a move targets a side, <see cref="Target" /> will be a (possibly fainted) Pokémon on that side.
+///         The specified <see cref="Pokemon" /> has used move <see cref="Move" /> at <see cref="Target" />. If a move has
+///         multiple targets or no target,
+///         <see cref="Target" /> should be ignored. If a move targets a side, <see cref="Target" /> will be a (possibly
+///         fainted) Pokémon on that side.
 ///     </para>
 ///     <see cref="Details" /> contains secondary information.
 /// </summary>
 [PublicAPI]
-public sealed record MoveElement(string Pokemon, string Move, string Target, MoveDetails Details) : ProtocolElement, IPokemonArgs
+public sealed record MoveElement(string Pokemon, string Move, string Target, MoveDetails Details)
+    : ProtocolElement, IPokemonArgs
 {
     public static MoveElement Parse(string[] segments)
     {
@@ -257,6 +261,7 @@ public sealed record MoveElement(string Pokemon, string Move, string Target, Mov
                 }
             }
         }
+
         return new MoveElement(segments[1], segments[2], segments[3], details);
     }
 }
@@ -271,10 +276,12 @@ public struct MoveDetails(bool miss, bool still, string? anim)
     ///     If <see langword="true" />, the move missed.
     /// </summary>
     public bool Miss = miss;
+
     /// <summary>
     ///     If <see langword="true" />, no animation should play.
     /// </summary>
     public bool Still = still;
+
     /// <summary>
     ///     If not <see langword="null" />, contains the name of the move whose
     ///     animation should be used instead of the move that was actually used.
@@ -302,7 +309,8 @@ public struct MoveDetails(bool miss, bool still, string? anim)
 ///         as a fraction; if it is your own Pokémon
 ///         then it will be <c>CURRENT/MAX</c>, if not, it will be <c>/100</c> if HP Percentage Mod is in effect and
 ///         <c>/48</c> otherwise.
-///         <see cref="Status" /> can be left <see cref="StatusID.None" />, or it can be <see cref="StatusID.Slp" />, <see cref="StatusID.Par" />, etc.
+///         <see cref="Status" /> can be left <see cref="StatusID.None" />, or it can be <see cref="StatusID.Slp" />,
+///         <see cref="StatusID.Par" />, etc.
 ///     </para>
 /// </summary>
 /// <remarks>
@@ -310,7 +318,8 @@ public struct MoveDetails(bool miss, bool still, string? anim)
 ///     which indicates it was unintentional (forced by Whirlwind, Roar, etc).
 /// </remarks>
 [PublicAPI]
-public sealed record SwitchElement(string Pokemon, string Details, string HP, StatusID Status) : ProtocolElement, IPokemonArgs, IDetailsArg
+public sealed record SwitchElement(string Pokemon, string Details, string HP, StatusID Status)
+    : ProtocolElement, IPokemonArgs, IDetailsArg
 {
     public static (string hp, StatusID status) ParseHPStatus(string hpStatus)
     {
@@ -323,44 +332,52 @@ public sealed record SwitchElement(string Pokemon, string Details, string HP, St
 
 /// <inheritdoc cref="SwitchElement" />
 [PublicAPI]
-public sealed record DragElement(string Pokemon, string Details, string HP, StatusID Status) : ProtocolElement, IPokemonArgs, IDetailsArg;
+public sealed record DragElement(string Pokemon, string Details, string HP, StatusID Status)
+    : ProtocolElement, IPokemonArgs, IDetailsArg;
 
 /// <summary>
 ///     <para>
 ///         The specified Pokémon has changed formes (via Mega Evolution, ability, etc.) to <c>SPECIES</c>
-///         (provided in <see cref="Details" /> for <see cref="DetailsChangeElement" />, provided directly for <see cref="FormeChangeElement" />.)
-///         If the forme change is permanent (Mega Evolution or a Shaymin-Sky that is frozen), then <see cref="DetailsChangeElement" /> will appear;
+///         (provided in <see cref="Details" /> for <see cref="DetailsChangeElement" />, provided directly for
+///         <see cref="FormeChangeElement" />.)
+///         If the forme change is permanent (Mega Evolution or a Shaymin-Sky that is frozen), then
+///         <see cref="DetailsChangeElement" /> will appear;
 ///         otherwise, the client will send <see cref="FormeChangeElement" />.
 ///     </para>
 ///     Syntax is the same as <see cref="SwitchElement" />.
 /// </summary>
 [PublicAPI]
-public sealed record DetailsChangeElement(string Pokemon, string Details, string HP, StatusID Status) : ProtocolElement, IPokemonArgs, IDetailsArg;
+public sealed record DetailsChangeElement(string Pokemon, string Details, string HP, StatusID Status)
+    : ProtocolElement, IPokemonArgs, IDetailsArg;
 
 /// <inheritdoc cref="DetailsChangeElement" />
 [PublicAPI]
 [MinorAction]
-public sealed record FormeChangeElement(string Pokemon, string Species, string HP, StatusID Status) : ProtocolElement, IPokemonArgs;
+public sealed record FormeChangeElement(string Pokemon, string Species, string HP, StatusID Status)
+    : ProtocolElement, IPokemonArgs;
 
 /// <summary>
 ///     <para>
 ///         Illusion has ended for the specified Pokémon.
-///         Syntax is the same as <see cref="SwitchElement" />, but remember that everything you thought you knew about the previous Pokémon is now wrong.
+///         Syntax is the same as <see cref="SwitchElement" />, but remember that everything you thought you knew about the
+///         previous Pokémon is now wrong.
 ///     </para>
-///     <see cref="Pokemon" /> will be the NEW Pokémon ID - i.e. it will have the nickname of the Zoroark (or other Illusion user).
+///     <see cref="Pokemon" /> will be the NEW Pokémon ID - i.e. it will have the nickname of the Zoroark (or other
+///     Illusion user).
 /// </summary>
 [PublicAPI]
-public sealed record ReplaceElement(string Pokemon, string Details, string HP, StatusID Status) : ProtocolElement, IPokemonArgs, IDetailsArg;
+public sealed record ReplaceElement(string Pokemon, string Details, string HP, StatusID Status)
+    : ProtocolElement, IPokemonArgs, IDetailsArg;
 
 /// <summary>
-///     Moves already active <see cref="Pokemon" /> to active field <see cref="Position" /> where the leftmost position is 0 and each position to the right counts up by 1.
+///     Moves already active <see cref="Pokemon" /> to active field <see cref="Position" /> where the leftmost position is
+///     0 and each position to the right counts up by 1.
 /// </summary>
 [PublicAPI]
 public sealed record SwapElement(string Pokemon, int Position) : ProtocolElement, IPokemonArgs
 {
     public static SwapElement Parse(string[] segments)
         => new(segments[1], int.Parse(segments[2]));
-
 }
 
 /// <summary>
@@ -379,9 +396,11 @@ public sealed record CantElement(string Pokemon, string Reason, string? Move) : 
             move = segments[3];
             usedCount = 3;
         }
+
         return new CantElement(segments[1], segments[2], move);
     }
 }
+
 /// <summary>
 ///     The Pokémon <see cref="Pokemon" /> has fainted.
 /// </summary>
@@ -404,7 +423,8 @@ public sealed record FailElement(string Pokemon, string Action) : ProtocolElemen
 /// </summary>
 [PublicAPI]
 [MinorAction]
-public sealed record BlockElement(string Pokemon, string Effect, string? Move, string? Attacker) : ProtocolElement, IPokemonArgs
+public sealed record BlockElement(string Pokemon, string Effect, string? Move, string? Attacker)
+    : ProtocolElement, IPokemonArgs
 {
     public static BlockElement Parse(string[] segments, out int usedCount)
     {
@@ -420,8 +440,10 @@ public sealed record BlockElement(string Pokemon, string Effect, string? Move, s
 }
 
 /// <summary>
-///     A move has failed due to there being no target Pokémon <see cref="Pokemon" />. <see cref="Pokemon" /> is <see langword="null" /> in Generation 1.
-///     This action is specific to Generations 1-4 as in later Generations a failed move will display using <see cref="FailElement" />.
+///     A move has failed due to there being no target Pokémon <see cref="Pokemon" />. <see cref="Pokemon" /> is
+///     <see langword="null" /> in Generation 1.
+///     This action is specific to Generations 1-4 as in later Generations a failed move will display using
+///     <see cref="FailElement" />.
 /// </summary>
 [PublicAPI]
 [MinorAction]
@@ -533,7 +555,8 @@ public sealed record CureStatusElement(string Pokemon, StatusID Status) : Protoc
 public sealed record CureTeamElement(string Pokemon) : ProtocolElement, IPokemonArgs;
 
 /// <summary>
-///     The specified Pokémon <see cref="Pokemon" /> has gained <see cref="Amount" /> in <see cref="Stat" />, using the standard rules for Pokémon stat changes in-battle.
+///     The specified Pokémon <see cref="Pokemon" /> has gained <see cref="Amount" /> in <see cref="Stat" />, using the
+///     standard rules for Pokémon stat changes in-battle.
 /// </summary>
 [PublicAPI]
 [MinorAction]
@@ -551,6 +574,7 @@ public sealed record BoostElement(string Pokemon, StatID Stat, int Amount) : Pro
                 return new BoostElement(pokemon, stat, amount);
             return new UnboostElement(pokemon, stat, amount);
         }
+
         return new SetBoostElement(pokemon, stat, amount);
     }
 }
@@ -563,7 +587,8 @@ public sealed record BoostElement(string Pokemon, StatID Stat, int Amount) : Pro
 public sealed record UnboostElement(string Pokemon, StatID Stat, int Amount) : ProtocolElement, IPokemonArgs;
 
 /// <summary>
-///     Same as <see cref="BoostElement" /> and <see cref="UnboostElement" />, but <see cref="Stat" /> is set to <see cref="Amount" /> instead of boosted by <see cref="Amount" />.
+///     Same as <see cref="BoostElement" /> and <see cref="UnboostElement" />, but <see cref="Stat" /> is set to
+///     <see cref="Amount" /> instead of boosted by <see cref="Amount" />.
 ///     (For example: Anger Point, Belly Drum)
 /// </summary>
 [PublicAPI]
@@ -571,7 +596,8 @@ public sealed record UnboostElement(string Pokemon, StatID Stat, int Amount) : P
 public sealed record SetBoostElement(string Pokemon, StatID Stat, int Amount) : ProtocolElement, IPokemonArgs;
 
 /// <summary>
-///     Swaps the boosts from <see cref="Stats" /> between the <see cref="Source" /> Pokémon and <see cref="Target" /> Pokémon.
+///     Swaps the boosts from <see cref="Stats" /> between the <see cref="Source" /> Pokémon and <see cref="Target" />
+///     Pokémon.
 ///     (For example: Guard Swap, Heart Swap).
 /// </summary>
 [PublicAPI]
@@ -615,12 +641,14 @@ public sealed record ClearBoostElement(string Pokemon) : ProtocolElement, IPokem
 public sealed record ClearAllBoostElement : ProtocolElement;
 
 /// <summary>
-///     Clear the positive boosts from the <see cref="Target" /> Pokémon due to an EFFECT of the <see cref="Pokemon" /> Pokémon.
+///     Clear the positive boosts from the <see cref="Target" /> Pokémon due to an EFFECT of the <see cref="Pokemon" />
+///     Pokémon.
 ///     (For example: 'move: Spectral Thief').
 /// </summary>
 [PublicAPI]
 [MinorAction]
-public sealed record ClearPositiveBoostElement(string Target, string Pokemon, string Effect) : ProtocolElement, IPokemonArgs;
+public sealed record ClearPositiveBoostElement(string Target, string Pokemon, string Effect)
+    : ProtocolElement, IPokemonArgs;
 
 /// <summary>
 ///     Clear the negative boosts from the target Pokémon <see cref="Pokemon" />.
@@ -640,8 +668,10 @@ public sealed record CopyBoostElement(string Source, string Target) : ProtocolEl
 
 /// <summary>
 ///     Indicates the weather that is currently in effect.
-///     If <see cref="Upkeep" /> is <see langword="true" />, it means that <see cref="Weather" /> was active previously and is still in effect that turn.
-///     Otherwise, it means that the weather has changed due to a move or ability, or has expired, in which case <see cref="Weather" /> will be <see langword="null" />.
+///     If <see cref="Upkeep" /> is <see langword="true" />, it means that <see cref="Weather" /> was active previously and
+///     is still in effect that turn.
+///     Otherwise, it means that the weather has changed due to a move or ability, or has expired, in which case
+///     <see cref="Weather" /> will be <see langword="null" />.
 /// </summary>
 [PublicAPI]
 [MinorAction]
@@ -653,11 +683,12 @@ public sealed record WeatherElement(string? Weather, bool Upkeep) : ProtocolElem
         foreach (var segment in segments.AsSpan(2))
         {
             if (segment == "[upkeep]")
-            { 
+            {
                 upkeep = true;
                 break;
             }
         }
+
         return new WeatherElement(segments[1], upkeep);
     }
 }
@@ -756,7 +787,8 @@ public sealed record ImmuneElement(string Pokemon) : ProtocolElement, IPokemonAr
 /// <summary>
 ///     The <see cref="Item" /> held by the <see cref="Pokemon" /> has been changed or revealed.
 ///     If this includes a <c>[from]EFFECT</c> tag, it is due to a move or ability <c>EFFECT</c>.
-///     Otherwise, it's because the Pokémon has just switched in, and its item is being announced to have a long-term effect.
+///     Otherwise, it's because the Pokémon has just switched in, and its item is being announced to have a long-term
+///     effect.
 /// </summary>
 [PublicAPI]
 [MinorAction]
@@ -769,7 +801,8 @@ public sealed record ItemElement(string Pokemon, string Item) : ProtocolElement,
 ///         Otherwise, it is because the item has destroyed itself (consumed Berries, Air Balloon).
 ///         If a berry is consumed, the <c>[eat]</c> tag will be included.
 ///     </para>
-///     This will be silent <c>[silent]</c> if the item's ownership was changed (with a move or ability like Thief or Trick),
+///     This will be silent <c>[silent]</c> if the item's ownership was changed (with a move or ability like Thief or
+///     Trick),
 ///     even if the move or ability would result in a Pokémon without an item.
 /// </summary>
 [PublicAPI]
@@ -779,7 +812,8 @@ public sealed record EndItemElement(string Pokemon, string Item) : ProtocolEleme
 /// <summary>
 ///     The <see cref="Ability" /> of the <see cref="Pokemon" /> has been changed or revealed.
 ///     If this includes a <c>[from]EFFECT</c> tag, it is due to a move or ability <c>EFFECT</c>.
-///     Otherwise, it's because the Pokémon has just switched in, and its ability is being announced to have a long-term effect.
+///     Otherwise, it's because the Pokémon has just switched in, and its ability is being announced to have a long-term
+///     effect.
 /// </summary>
 [PublicAPI]
 [MinorAction]
@@ -884,7 +918,8 @@ public sealed record MessageElement(string Message) : ProtocolElement;
 public sealed record CombineElement : ProtocolElement;
 
 /// <summary>
-///     The <see cref="Source" /> Pokémon has used a move and is waiting for the <see cref="Target" /> Pokémon (For example: Fire Pledge).
+///     The <see cref="Source" /> Pokémon has used a move and is waiting for the <see cref="Target" /> Pokémon (For
+///     example: Fire Pledge).
 /// </summary>
 [PublicAPI]
 [MinorAction]
@@ -892,7 +927,8 @@ public sealed record WaitingElement(string Source, string Target) : ProtocolElem
 
 /// <summary>
 ///     <para>
-///         The <see cref="Attacker" /> Pokémon is preparing to use a charge <see cref="Move" /> on the <see cref="Defender" />. (For example: Sky Drop).
+///         The <see cref="Attacker" /> Pokémon is preparing to use a charge <see cref="Move" /> on the
+///         <see cref="Defender" />. (For example: Sky Drop).
 ///     </para>
 ///     If <see cref="Defender" /> is <see langword="null" />, the target is unknown. (For example: Dig, Fly).
 /// </summary>
@@ -909,6 +945,7 @@ public sealed record PrepareElement(string Attacker, string Move, string? Defend
             defender = segments[3];
             usedCount = 3;
         }
+
         return new PrepareElement(segments[1], segments[2], defender);
     }
 }
@@ -942,7 +979,8 @@ public sealed record HitCountElement(string Pokemon, int Num) : ProtocolElement,
 }
 
 /// <summary>
-///     The Pokémon ¿<see cref="Pokemon" /> used move <see cref="Move" /> which causes a temporary effect lasting the duration of the move.
+///     The Pokémon ¿<see cref="Pokemon" /> used move <see cref="Move" /> which causes a temporary effect lasting the
+///     duration of the move.
 ///     (For example: Grudge, Destiny Bond).
 /// </summary>
 [PublicAPI]
@@ -950,7 +988,8 @@ public sealed record HitCountElement(string Pokemon, int Num) : ProtocolElement,
 public sealed record SingleMoveElement(string Pokemon, string Move) : ProtocolElement, IPokemonArgs;
 
 /// <summary>
-///     The Pokémon <see cref="Pokemon" /> used move <see cref="Move" /> which causes a temporary effect lasting the duration of the turn.
+///     The Pokémon <see cref="Pokemon" /> used move <see cref="Move" /> which causes a temporary effect lasting the
+///     duration of the turn.
 ///     (For example: Protect, Focus Punch, Roost).
 /// </summary>
 [PublicAPI]
@@ -1070,6 +1109,30 @@ public sealed record ErrorElement(ErrorType Type, string Message) : ProtocolElem
 }
 
 /// <summary>
+///     A JavaScript expression that was evaluated by the simulator.
+/// </summary>
+/// <param name="Input">
+///     The input expression that was evaluated.
+/// </param>
+[PublicAPI]
+public sealed record EvalInputElement(string Input) : ProtocolElement;
+
+/// <summary>
+///     A JavaScript expression evaluation result from the simulator.
+/// </summary>
+/// <param name="Output">
+///     The output result of the evaluated expression.
+/// </param>
+[PublicAPI]
+public sealed record EvalOutputElement(string Output) : ProtocolElement;
+
+/// <summary>
+///     <see cref="ProtocolCodec" /> does not support this message type yet, so it is received as an unknown element.
+/// </summary>
+[PublicAPI]
+public sealed record UnknownElement(string Content) : ProtocolElement;
+
+/// <summary>
 ///     The type of error output by the Pokémon Showdown simulator, obtained in <see cref="ErrorElement" />.
 /// </summary>
 [PublicAPI]
@@ -1079,12 +1142,6 @@ public enum ErrorType
     InvalidChoice,
     UnavailableChoice
 }
-
-/// <summary>
-///     <see cref="ProtocolCodec" /> does not support this message type yet, so it is received as an unknown element.
-/// </summary>
-[PublicAPI]
-public sealed record UnknownElement(string Content) : ProtocolElement;
 
 public interface IPokemonArgs
 {

@@ -253,20 +253,20 @@ public static class ProtocolCodec
         if (!trimmedLine.StartsWith('|'))
             return null;
 
-        // Handle eval input commands (||>>> code)
+        // Handle eval input elements (||>>> code)
         if (trimmedLine.StartsWith("||>>>"))
         {
             return new EvalInputElement(trimmedLine[6..]);
         }
 
-        // Handle eval output commands (||<<< result)
+        // Handle eval output elements (||<<< result)
         if (trimmedLine.StartsWith("||<<<"))
         {
             return new EvalOutputElement(trimmedLine[6..]);
         }
 
         // Standard protocol elements use '|' as field delimiter
-        // Format: |command|arg1|arg2|...
+        // Format: |type|arg1|arg2|...
         var segments = trimmedLine[1..].Split('|'); // Remove leading '|' and split
 
         if (segments.Length < 1)

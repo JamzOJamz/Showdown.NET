@@ -58,4 +58,7 @@ public static class FormatID
 
     /// <summary>Generation 3 custom game format (doubles).</summary>
     public const string Gen3DoublesCustomGame = "gen3doublescustomgame";
+    
+    /// <summary>Generation 7 random battle format (singles).</summary>
+    public const string Gen7RandomBattle = "gen7randombattle";
 }

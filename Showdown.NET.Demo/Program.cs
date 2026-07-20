@@ -1,4 +1,5 @@
-﻿﻿using Showdown.NET.Protocol;
+﻿using Showdown.NET.Definitions;
+using Showdown.NET.Protocol;
 using Showdown.NET.Simulator;
 
 namespace Showdown.NET.Demo;
@@ -50,7 +51,8 @@ internal class Program
         var stream = new BattleStream();
         var outputTask = PrintOutputsToConsole(stream);
 
-        WriteAndLog(stream, ProtocolCodec.EncodeStartCommand("gen7randombattle")); // >start {"formatid":"gen7randombattle"}
+        WriteAndLog(stream,
+            ProtocolCodec.EncodeStartCommand(FormatID.Gen7RandomBattle)); // >start {"formatid":"gen7randombattle"}
         WriteAndLog(stream, ProtocolCodec.EncodeSetPlayerCommand(1, "Alice")); // >player p1 {"name":"Alice"}
         WriteAndLog(stream, ProtocolCodec.EncodeSetPlayerCommand(2, "Bob")); // >player p2 {"name":"Bob"}
 
@@ -84,7 +86,7 @@ internal class Program
         var stream = new BattleStream();
         var outputTask = PrintOutputsToConsole(stream);
 
-        WriteAndLog(stream, ProtocolCodec.EncodeStartCommand("gen9customgame"));
+        WriteAndLog(stream, ProtocolCodec.EncodeStartCommand(FormatID.Gen9CustomGame));
         WriteAndLog(stream, ProtocolCodec.EncodeSetPlayerCommand(1, "Red", p1Team));
         WriteAndLog(stream, ProtocolCodec.EncodeSetPlayerCommand(2, "Green", p2Team));
         WriteAndLog(stream, ProtocolCodec.EncodePlayerChoiceCommand(1, "team", "123456"));
@@ -136,7 +138,7 @@ internal class Program
         await foreach (var output in stream.ReadOutputsAsync())
         {
             Console.WriteLine($"[<<<] {output}");
-            
+
             // var parsed = ProtocolCodec.Parse(output);
             // Work with parsed message here
         }

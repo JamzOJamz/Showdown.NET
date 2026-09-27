@@ -710,6 +710,13 @@ public sealed record FieldStartElement(string Condition) : ProtocolElement;
 public sealed record FieldEndElement(string Condition) : ProtocolElement;
 
 /// <summary>
+///     A single-event field effect <see cref="Condition" /> has triggered. (i.e. Teatime, Electrify, Perish Song, extreme weather activation)
+/// </summary>
+[PublicAPI]
+[MinorAction]
+public sealed record FieldActivateElement(string Condition) : ProtocolElement;
+
+/// <summary>
 ///     A side condition <see cref="Condition" /> has started on <see cref="Side" />.
 ///     Side conditions are all effects that affect one side of the field.
 ///     (For example: Tailwind, Stealth Rock, Reflect)

@@ -489,6 +489,10 @@ public static class ProtocolCodec
                 elem = new FieldEndElement(segments[1]);
                 usedCount = 1;
                 break;
+            case "-fieldactivate" when segments.Length > 1:
+                elem = new FieldActivateElement(segments[1]);
+                usedCount = 1;
+                break;
             case "-sidestart" when segments.Length > 2:
                 elem = SideStartElement.Parse(segments);
                 usedCount = 2;

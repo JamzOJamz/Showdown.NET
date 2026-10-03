@@ -1,9 +1,9 @@
+# Showdown.NET
+
 > [!WARNING]
 > **Experimental**
 >
-> Showdown.NET is currently **unstable** and APIs may change at any time. Use with caution!
-
-# Showdown.NET
+> This library is currently **unstable** and APIs may change at any time. Use with caution!
 
 **Showdown.NET** is a **.NET library** that provides a C# interface for the [Pokémon Showdown](https://pokemonshowdown.com) battle simulator ([repo](https://github.com/smogon/pokemon-showdown)).
 
